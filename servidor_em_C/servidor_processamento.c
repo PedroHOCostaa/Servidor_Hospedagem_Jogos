@@ -48,9 +48,9 @@ void jogo()
     if(tipoJogo == 1)
     {
         qtdNaviosJ2[0] = qtdNaviosJ1[0] = qtdNavios[0] = 1;
-        qtdNaviosJ2[1] = qtdNaviosJ1[1] = qtdNavios[1] = 0;
-        qtdNaviosJ2[2] = qtdNaviosJ1[2] = qtdNavios[2] = 0;
-        qtdNaviosJ2[3] = qtdNaviosJ1[3] = qtdNavios[3] = 0;
+        qtdNaviosJ2[1] = qtdNaviosJ1[1] = qtdNavios[1] = 1;
+        qtdNaviosJ2[2] = qtdNaviosJ1[2] = qtdNavios[2] = 1;
+        qtdNaviosJ2[3] = qtdNaviosJ1[3] = qtdNavios[3] = 1;
         qtdTiros = 1;
     }
     if(tipoJogo == 2)
@@ -213,18 +213,5 @@ void* sala(void* arg)
 
 int main()
 {
-    pthread_t threads[SALAS];
-
-    for(int i = 0; i < SALAS; i++)
-    {
-        int* arg = malloc(sizeof(int));
-        *arg = i;
-        printf("Criando sala %d\n", i);
-        pthread_create(&threads[i], NULL, sala, (void*)arg);
-        jogadoresNaSalas[i] = 0;
-    }
-    for(int i = 0; i < SALAS; i++)
-    {
-        pthread_join(threads[i], NULL);
-    }
+    jogo();
 }
