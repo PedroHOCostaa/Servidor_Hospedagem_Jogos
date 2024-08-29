@@ -18,19 +18,21 @@ void pintaestrutura(struct mapa* meuMapa,struct navio* navio);
 void imprimirMeuMapa(struct mapa* meuMapa);
 void imprimirMapaAdversario(struct mapa* meuMapa);
 void imprimeNavio(struct navio* navio);
+int verificaPerdedor(struct mapa* meuMapa);
 
-/// @brief // Estrutura de lista encadeada
+/// @brief      Estrutura de lista encadeada
 struct no {
     struct navio* navio;
     struct no* prox;
 };
 
-/// @brief // Estrutura de um navio
+/// @brief      Estrutura de um navio
 struct navio {
     int ancoraColuna, ancoraLinha, tamanhoColuna, tamanhoLinha;         // exemplo1: para um barco {{1, 1}} possui tamanhoColuna 1 e tamanhoLinha 2 e se ancora estiver em {0,0} 
     int orientacao;                                                     // o barco estará em {0,0} e {0,1}
     int tipo;                                                           // exemplo2: para um barco {{1,1,1},{1,1,1}} possui tamanhoColuna 2 e tamanhoLinha 3 e se ancora estiver em {0,0}
     int** estrutura;                                                    // o barco estará em {0,0}, {0,1}, {0,2}, {1,0}, {1,1}, {1,2}
+    int estado;                                                         
 };
 
 struct celula {

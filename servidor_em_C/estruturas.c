@@ -21,22 +21,22 @@ int inicializaNavio(struct navio* novoNavio, int tipo, int orientacao)
 {
     novoNavio->tipo = tipo;
     novoNavio->orientacao = orientacao;
-    if(tipo == 1)                                                       //Navio {{0, 0}}
+    if(tipo == 0)                                                       //Navio {{0, 0}}
     {
         novoNavio->tamanhoColuna = 1;
         novoNavio->tamanhoLinha = 2;
     } 
-    else if(tipo == 2)                                                  //Navio {{0, 0, 0}}
+    else if(tipo == 1)                                                  //Navio {{0, 0, 0}}
     {
         novoNavio->tamanhoColuna = 1;
         novoNavio->tamanhoLinha = 3;
     } 
-    else if(tipo == 3)                                                  //Navio {{0, 0, 0, 0}}
+    else if(tipo == 2)                                                  //Navio {{0, 0, 0, 0}}
     {
         novoNavio->tamanhoColuna = 1;
         novoNavio->tamanhoLinha = 4;
     } 
-    else if(tipo == 4)                                                  //Navio {{0, 0, 0},
+    else if(tipo == 3)                                                  //Navio {{0, 0, 0},
     {                                                                   //       {0, 0, 0}}
         novoNavio->tamanhoColuna = 2;
         novoNavio->tamanhoLinha = 3;
@@ -52,6 +52,7 @@ int inicializaNavio(struct navio* novoNavio, int tipo, int orientacao)
     {
         novoNavio->estrutura[i] = (int*)calloc(novoNavio->tamanhoLinha, sizeof(int));   // Aloca memória para a estrutura do navio, vetor das partes
     }
+    novoNavio->estado = 1;
     return 0;
 }
 
@@ -119,11 +120,20 @@ int insereNavio(struct mapa* meuMapa, struct navio* novoNavio, int ancoraColuna,
     return 0;
 }
 
+/// @brief                  Marca na estrutura do navio qual parte foi acertada
+/// @param navio            Ponteiro para o navio que será acertado
+/// @param coluna           Inteiro que representa a posição no eixo Y do mapa que recebeu o tiro
+/// @param linha            Inteiro que representa a posição no eixo X do mapa que recebeu o tiro
 void acertaNavio(struct navio* navio, int coluna, int linha)
 {
     navio->estrutura[coluna - navio->ancoraColuna][linha - navio->ancoraLinha] = 1;
 }
 
+/// @brief                  Realiza um tiro na posição indicada no tabuleiro do jogador alvo
+/// @param meuMapa          Ponteiro para o mapa do jogador que recebe o Tiro 
+/// @param coluna           Inteiro que represnta a posição no eixo Y que receberá o tiro
+/// @param linha            Inteiro que represnta a posição no eixo X que receberá o tiro
+/// @return                 Retorna 0 se o tiro acertou a agua, 1 se o tiro acertou um navio
 int atira(struct mapa* meuMapa, int coluna, int linha)
 {
     if(meuMapa->tabuleiro[coluna][linha].indicador == 1)
@@ -137,6 +147,9 @@ int atira(struct mapa* meuMapa, int coluna, int linha)
     return 0;               // 0: Tiro na água
 }
 
+/// @brief                  Verifica a estrutura de um navio se ele ainda possuin partes não destruidas
+/// @param meuMapa          Ponteiro para o navio que terá a integridade verificada
+/// @return                 Retorna 0 se o navio ainda permanece na superficie, 1 se o navio foi afundado
 int verificarEstrtura(struct navio* navio)
 {
     for(int i = 0; i < navio->tamanhoColuna; i++)
@@ -152,6 +165,9 @@ int verificarEstrtura(struct navio* navio)
     return 1;               // 1: Navio foi destruido por completo
 }
 
+/// @brief                  Pinta a estrutura do navio no mapa do jogador adversario, está função é chamada ao um navio ser completamente atingido
+/// @param meuMapa          Ponteiro para o mapa do jogador que terá a estrutura do navio pintada no mapa adversario 
+/// @param navio            Ponteiro do navio que foi destruido
 void pintaestrutura(struct mapa* meuMapa, struct navio* navio)
 {
     for(int i = 0; i < navio->tamanhoColuna; i++)
@@ -163,6 +179,11 @@ void pintaestrutura(struct mapa* meuMapa, struct navio* navio)
     }
 }
 
+/// @brief                  Realiza um tiro na posição indicada no tabuleiro do jogador alvo, se o navio for destruido por completo pinta o mapa do jogador adversario e seta o estado do navio para 0
+/// @param meuMapa          Ponteiro para o mapa do jogador que receber o Tiro 
+/// @param coluna           Inteiro que represnta a posição no eixo Y que receberá o tiro
+/// @param linha            Inteiro que represnta a posição no eixo X que receberá o tiro
+/// @return                 Retorna 0 se o tiro acertou a agua, 1 se o tiro acertou um navio mas ele permance na superficie, 2 se o tiro acertou um navio e ele foi afundado
 int realizarTiro(struct mapa* meuMapa, int coluna, int linha)
 {
     
@@ -170,9 +191,10 @@ int realizarTiro(struct mapa* meuMapa, int coluna, int linha)
     {
         struct navio* navioAlvo = meuMapa->tabuleiro[coluna][linha].superficie;
     
-        if(verificarEstrtura(navioAlvo) == 1)
+        if(verificarEstrtura(navioAlvo) == 1)   
         {
             pintaestrutura(meuMapa, navioAlvo);
+            navioAlvo->estado = 0;
             return 2;       // 2: Tipo acertado e navio destruido
         }    
         return 1;           // 1: Tiro acertado mas navio permanece 
@@ -235,4 +257,20 @@ void imprimeNavio(struct navio* navio)
         }
         printf("\n\n");
     }
+}
+
+/// @brief                  Verifica se o jogador perdeu o jogo
+/// @return                 Retorna 1 se o jogador perdeu o jogo, 0 se o jogador ainda possui navios na superficie
+int verificaPerdedor(struct mapa* meuMapa)
+{
+    return vefificaPerdedorAux(meuMapa->listaBarcos);
+}
+
+int vefificaPerdedorAux(struct no* lista)
+{
+    if(lista == NULL)
+        return 1;                               /// Se a lista está vazia então returna 1
+    if(lista->navio->estado == 1)               
+        return 0;                               /// Se o navio no inicio da lista ainda está não foi completamente destruido então retorna 0
+    return vefificaPerdedorAux(lista->prox);    /// Se o navio ja foi destruido então retorna o resultado da chamada recurciva da cauda da lista
 }
