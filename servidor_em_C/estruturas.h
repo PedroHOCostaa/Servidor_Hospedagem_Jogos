@@ -19,6 +19,8 @@ void imprimirMeuMapa(struct mapa* meuMapa);
 void imprimirMapaAdversario(struct mapa* meuMapa);
 void imprimeNavio(struct navio* navio);
 int verificaPerdedor(struct mapa* meuMapa);
+int vefificaPerdedorAux(struct no* lista);
+
 
 /// @brief      Estrutura de lista encadeada
 struct no {
