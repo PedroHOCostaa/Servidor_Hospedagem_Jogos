@@ -204,21 +204,25 @@ void* sala(void* arg)
 {
     /// Cria um socket para se conectar com o servidor de administração, ao se conectar com o servidor
     /// Ele ao receber a conexão cria uma thread que irá se comunicar com está
+    /// Ponto 1
     
-
     /// Cria um socket para esperar conexões do servidor de comunicação
-    /// Envia para o servidor de administração qual a porta que está associada ao socket de comunicação do cliente
+    /// Envia para a thread do servidor de administração o id desta sala e a porta que irá esperar uma conexão de cliente
+    /// Ponto 2
+
     while(1)
     {
+        /// Ponto 3 primeiro jogador
         /// Aceita uma conexão do servidor de comunicação
         /// Avisa que a sala está em espera de um jogador
 
+        /// Ponto 3 segundo jogador
         /// Aceita uma segunda conexão com o servidor de comunicaçãp
-        /// Avisa para o servidor que o jogo está acontecendo
 
         jogo();
 
         /// avisa para o servidor de administração que a sala está vazia
+        /// Ponto 4
     }
 
 }
