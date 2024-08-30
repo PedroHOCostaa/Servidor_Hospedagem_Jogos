@@ -202,18 +202,19 @@ void jogo()
 
 void* sala(void* arg)
 {
-    /// cria um socket para se conectar com o servidor de administração
-    /// avisa que a sala vazia, e indica qual a porta que a sala está escutando
+    /// Cria um socket para se conectar com o servidor de administração, ao se conectar com o servidor
+    /// Ele ao receber a conexão cria uma thread que irá se comunicar com está
     
 
-    /// cria um socket para esperar conexões do servidor de comunicação
+    /// Cria um socket para esperar conexões do servidor de comunicação
+    /// Envia para o servidor de administração qual a porta que está associada ao socket de comunicação do cliente
     while(1)
     {
-        /// aceita uma conexão do servidor de comunicação
-        /// avisa que a sala está em espera de um jogador
+        /// Aceita uma conexão do servidor de comunicação
+        /// Avisa que a sala está em espera de um jogador
 
-        /// aceita uma segunda conexão com o servidor de comunicaçãp
-        /// avisa para o servidor que o jogo está acontecendo
+        /// Aceita uma segunda conexão com o servidor de comunicaçãp
+        /// Avisa para o servidor que o jogo está acontecendo
 
         jogo();
 

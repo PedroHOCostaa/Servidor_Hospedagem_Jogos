@@ -6,6 +6,8 @@ semaforo1 = threading.Semaphore(1)
 
 lista_salas = []
 lista_thrads_servidor = []
+
+
 class Sala:
     def __init__(self, ip, port):
         self.ip = ip
@@ -50,10 +52,10 @@ def procura_sala_vaga():
 def thread_handle_cliente(conn, addr):
     semaforo1.acquire()
     sala = procura_sala_vaga()
-    conn.send(struct.pack('>II', sala.port, len(sala.ip)))
-    conn.send(sala.ip.encode())
     sala.estado = sala.estado + 1
     semaforo1.release()
+    conn.send(struct.pack('>II', sala.port, len(sala.ip)))
+    conn.send(sala.ip.encode())
 
 def thread_clientes():
     socket_clientes = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
