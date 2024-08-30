@@ -8,7 +8,7 @@
 #include <pthread.h>
 #include "estruturas.h"
 
-#define PORT "8080"
+#define PORT "65430"
 #define HOST "127.0.0.1"
 #define SALAS 5
 
@@ -48,9 +48,9 @@ void jogo()
     if(tipoJogo == 1)
     {
         qtdNaviosJ2[0] = qtdNaviosJ1[0] = qtdNavios[0] = 1;
-        qtdNaviosJ2[1] = qtdNaviosJ1[1] = qtdNavios[1] = 1;
-        qtdNaviosJ2[2] = qtdNaviosJ1[2] = qtdNavios[2] = 1;
-        qtdNaviosJ2[3] = qtdNaviosJ1[3] = qtdNavios[3] = 1;
+        qtdNaviosJ2[1] = qtdNaviosJ1[1] = qtdNavios[1] = 0;
+        qtdNaviosJ2[2] = qtdNaviosJ1[2] = qtdNavios[2] = 0;
+        qtdNaviosJ2[3] = qtdNaviosJ1[3] = qtdNavios[3] = 0;
         qtdTiros = 1;
     }
     if(tipoJogo == 2)
@@ -202,16 +202,40 @@ void jogo()
 
 void* sala(void* arg)
 {
-    printf("Sala %d\n", *((int*)arg));
-    jogo();
+    /// cria um socket para se conectar com o servidor de administração
+    /// avisa que a sala vazia, e indica qual a porta que a sala está escutando
+    
+
+    /// cria um socket para esperar conexões do servidor de comunicação
     while(1)
     {
-        sleep(1);
+        /// aceita uma conexão do servidor de comunicação
+        /// avisa que a sala está em espera de um jogador
+
+        /// aceita uma segunda conexão com o servidor de comunicaçãp
+        /// avisa para o servidor que o jogo está acontecendo
+
+        jogo();
+
+        /// avisa para o servidor de administração que a sala está vazia
     }
-    return NULL;
+
 }
 
 int main()
 {
-    jogo();
+    pthread_t threads[SALAS];
+
+    for(int i = 0; i < SALAS; i++)
+    {
+        int* arg = malloc(sizeof(int));
+        *arg = i;
+        printf("Criando sala %d\n", i);
+        pthread_create(&threads[i], NULL, sala, (void*)arg);
+        jogadoresNaSalas[i] = 0;
+    }
+    for(int i = 0; i < SALAS; i++)
+    {
+        pthread_join(threads[i], NULL);
+    }
 }
