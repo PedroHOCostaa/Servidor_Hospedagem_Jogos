@@ -48,7 +48,7 @@ def procura_sala_vaga():
     for sala in lista_salas:
         if sala.estado == 0:    ### Procura sala vazias
             return sala
-    return None  ### Retorna None explicitamente quando não encontrar uma sala disponível
+    return None     ### Retorna None explicitamente quando não encontrar uma sala disponível
 
 def thread_handle_cliente(conn, addr):
     semaforo1.acquire()

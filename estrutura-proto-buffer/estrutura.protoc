@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+
+message Filme {
+  int32 id = 1;                  // Identificador único do filme
+  string titulo = 2;             // Título do filme
+  string diretor = 3;            // Nome do diretor
+  int32 ano = 4;                 // Ano de lançamento
+  repeated string atores = 5;    // Lista de atores
+  repeated string genero = 6;    // Gênero do filme
+  float duracao = 7;             // Duração do filme em minutos
+}
+
+
+message Informacoes_sala {
+  int32 op = 1;
+  int32 id = 2;
+  int32 port = 3;
+  string ip = 4;
+  int32 estado = 5;
+}
+
+
+message Informacoes_tiro {
+  int32 colunaAlvo = 1;
+  int32 linhaAlvo = 2;
+}
