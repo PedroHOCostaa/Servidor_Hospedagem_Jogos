@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <pthread.h>
@@ -202,6 +203,39 @@ void jogo()
 
 void* sala(void* arg)
 {
+ struct sockaddr_in endereco_servidor_admin;
+    int id_sala = *((int*)arg);
+    free(arg);
+
+    // Ponto 1: Criação do socket para o servidor de administração
+    int admin_socket = socket(AF_INET, SOCK_STREAM, 0); 
+    if (admin_socket < 0) {
+        perror("Erro ao criar o socket para o servidor de administração");
+        return NULL;
+    }
+
+    // Configuração do endereço do servidor de administração
+    endereco_servidor_admin.sin_family = AF_INET;
+    endereco_servidor_admin.sin_port = htons(5000); // Porta do servidor de administração
+    endereco_servidor_admin.sin_addr.s_addr = inet_addr("127.0.0.1"); // IP do servidor (localhost)
+
+    // Conectar ao servidor de administração
+    if (connect(admin_socket, (struct sockaddr*)&endereco_servidor_admin, sizeof(endereco_servidor_admin)) < 0) {
+        perror("Erro ao conectar com o servidor de administração");
+        close(admin_socket);
+        return NULL;
+    }
+
+    printf("Conectado ao servidor de administração.\n");
+
+    // Cria uma thread para se comunicar com o servidor de administração
+    pthread_t thread_admin;
+    if (pthread_create(&thread_admin, NULL, comunicar_com_admin, (void*)&admin_socket) != 0) {
+        perror("Erro ao criar a thread para o servidor de administração");
+        close(admin_socket);
+        return NULL;
+    }
+
     /// Cria um socket para se conectar com o servidor de administração, ao se conectar com o servidor
     /// Ele ao receber a conexão cria uma thread que irá se comunicar com está
     /// Ponto 1
@@ -210,7 +244,7 @@ void* sala(void* arg)
     /// Envia para a thread do servidor de administração o id desta sala e a porta que irá esperar uma conexão de cliente
     /// Ponto 2
 
-    while(1)
+    while(1)    
     {
         /// Ponto 3 primeiro jogador
         /// Aceita uma conexão do servidor de comunicação
@@ -221,12 +255,49 @@ void* sala(void* arg)
 
         jogo();
 
-        /// avisa para o servidor de administração que a sala está vazia
+        /// avisa para o servidor de administração que a sala está vazia e retorna quem ganhou ou se houve erro
         /// Ponto 4
     }
 
 }
 
+void* comunicar_com_admin(void* arg) {
+    // Estrutura de dados contendo os parâmetros para o envio ao admin
+    struct admin_data {
+        int op;         // Operação
+        int port;       // Porta
+        int error;      // Código de erro
+        int ip_size;    // Tamanho do IP
+        char* ip;       // IP em formato UTF-8
+        int admin_socket; // Socket de conexão com o servidor de administração
+    };
+
+    struct admin_data* data = (struct admin_data*)arg;
+
+    // Montar o cabeçalho seguindo o formato especificado
+    int buffer_size = 4 * sizeof(int) + data->ip_size;
+    char buffer[buffer_size];
+
+    memcpy(buffer, &data->op, sizeof(int));                  // Copiar operação
+    memcpy(buffer + sizeof(int), &data->port, sizeof(int));  // Copiar porta
+    memcpy(buffer + 2 * sizeof(int), &data->error, sizeof(int));  // Copiar código de erro
+    memcpy(buffer + 3 * sizeof(int), &data->ip_size, sizeof(int)); // Copiar o tamanho do IP
+    memcpy(buffer + 4 * sizeof(int), data->ip, data->ip_size);     // Copiar o IP
+
+    // Enviar os dados para o servidor de administração
+    if (send(data->admin_socket, buffer, buffer_size, 0) < 0) {
+        perror("Erro ao enviar dados ao servidor de administração");
+        close(data->admin_socket);
+        pthread_exit(NULL);
+    }
+
+    printf("Dados enviados ao servidor de administração: op=%d, port=%d, error=%d, ip=%s\n", 
+           data->op, data->port, data->error, data->ip);
+
+    // Encerrar a conexão e a thread
+    close(data->admin_socket);
+    pthread_exit(NULL);
+}
 int main()
 {
     pthread_t threads[SALAS];
@@ -236,7 +307,7 @@ int main()
         int* arg = malloc(sizeof(int));
         *arg = i;
         printf("Criando sala %d\n", i);
-        pthread_create(&threads[i], NULL, sala, (void*)arg);
+        pthread_create(&threads[i], NULL, sala, (void*)arg);    // Cria uma thread para cada sala
         jogadoresNaSalas[i] = 0;
     }
     for(int i = 0; i < SALAS; i++)
