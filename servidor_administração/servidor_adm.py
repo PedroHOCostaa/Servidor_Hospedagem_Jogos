@@ -8,6 +8,7 @@ lista_salas = []
 lista_thrads_servidor = []
 
 
+
 ### ========================= ###
 ### Protocolos de comunicação ###
 ### ========================= ###
@@ -29,8 +30,8 @@ lista_thrads_servidor = []
 ### Servidor de processamento -> Servidor de salas
 
 # =================================================================== #
-# | op (int 4 bytes)| id (int 4 bytes)| port (int 4 bytes)          | #
-# | size (int 4 bytes) | ip (string size bytes)| error (int 4 bytes)| #
+# | op (int 4 bytes)| port (int 4 bytes)|     error (int 4 bytes)   | #
+# | size (int 4 bytes) |            ip (string size bytes)          | #
 # =================================================================== #
 
 
@@ -93,12 +94,17 @@ def thread_handle_cliente(conn, addr):
 
 def thread_clientes():
     socket_clientes = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    socket_clientes.bind(('localhost', 5001))
-    socket_clientes.listen()
+    socket_clientes.bind(('localhost', 5001))                   
+    socket_clientes.listen()                                ### Espera clientes conectarem para pedir o endereço de uma sala vaga
     while True:
-        conn, addr = socket_clientes.accept()
+        conn, addr = socket_clientes.accept()               ### Cliente conectou, agora chama um thread para lidar com ele
         thread_cli = threading.Thread(target=thread_handle_cliente, args=(conn, addr))
+        thread_cli.start()
 
 def ligar_servidor():
+    thread_sala_espera = threading.Thread(target=thread_salas)
+    thread_sala_espera.start()
+    thread_espera_clientes = threading.Thread(target=thread_clientes)
+    thread_espera_clientes.start()
     while True:
         pass
