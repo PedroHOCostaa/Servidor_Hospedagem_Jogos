@@ -27,10 +27,11 @@ lista_thrads_servidor = []
 # ===================================================== #
 
 ### Servidor de processamento -> Servidor de salas
-# ============================================================================== #
-# | op (int 4 bytes)| id (int 4 bytes)| port (int 4 bytes)| error (int 4 bytes)| #
-# | size (int 4 bytes) |        ip (string size bytes)                         | #
-# ============================================================================== #
+
+# =================================================================== #
+# | op (int 4 bytes)| id (int 4 bytes)| port (int 4 bytes)          | #
+# | size (int 4 bytes) | ip (string size bytes)| error (int 4 bytes)| #
+# =================================================================== #
 
 
 
