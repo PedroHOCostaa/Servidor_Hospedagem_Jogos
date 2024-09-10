@@ -8,6 +8,32 @@ lista_salas = []
 lista_thrads_servidor = []
 
 
+### ========================= ###
+### Protocolos de comunicação ###
+### ========================= ###
+
+### Servidor de administração -> Cliente
+
+# ============================================================ #
+# | op (int 4 bytes)| port (int 4 bytes)| error (int 4 bytes)| #
+# | size (int 4 bytes) |        ip (string size bytes)       | #
+# ============================================================ #
+
+### Cliente -> Servidor de administração
+
+# ===================================================== #
+# | op (int 4 bytes)| jogo selecionado (int 4 bytes)  | #
+# | size (int 4 bytes) |      nome (string size bytes)| #
+# ===================================================== #
+
+### Servidor de processamento -> Servidor de salas
+# ============================================================================== #
+# | op (int 4 bytes)| id (int 4 bytes)| port (int 4 bytes)| error (int 4 bytes)| #
+# | size (int 4 bytes) |        ip (string size bytes)                         | #
+# ============================================================================== #
+
+
+
 class Sala:
     def __init__(self, ip, port, id):
         self.ip = ip
