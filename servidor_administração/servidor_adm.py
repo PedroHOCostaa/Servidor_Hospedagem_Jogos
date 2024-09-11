@@ -45,7 +45,7 @@ class Sala:
         
 
 def thread_handle_sala(conn, addr):             
-    op, port, error, size = struct.unpack('>IIII', conn.recv(16))   ### Ponto 2 sala op == 1 pois indica que uma sala acabou de ser aberta
+    op, port, error, size = struct.unpack('!IIII', conn.recv(16))   ### Ponto 2 sala op == 1 pois indica que uma sala acabou de ser aberta
     ip = conn.recv(size).decode()       # Decodifica o ip para utf-8
     
     
@@ -57,7 +57,7 @@ def thread_handle_sala(conn, addr):
     
     while True:
         ### Recebe uma mensagem da sala indicando que o jogo acabou op == 1 pois indica que jogo acabou
-        op, resultado, erro, size = struct.unpack('>IIII', conn.recv(16))
+        op, resultado, erro, size = struct.unpack('!IIII', conn.recv(16))
         nome = conn.recv(size).decode()     ### Recebe o nome do jogador que venceu a partida
 
 
@@ -112,13 +112,13 @@ def thread_handle_cliente(conn, addr):
     if sala is None:
         semaforo1.release()         # ================região critica================== # Final se não encontrar sala
         mensagem =  "Não há salas disponíveis no momento".encode()
-        conn.send(struct.pack('>IIII', 0, 0, 44, len(mensagem))) ### Envia 0 para indicar que não há sala disponível
+        conn.send(struct.pack('!IIII', 0, 0, 44, len(mensagem))) ### Envia 0 para indicar que não há sala disponível
         conn.send(mensagem)                           ### Envia a mensagem de erro para o cliente
         conn.close()
         return
     sala.estado = sala.estado + 1
     semaforo1.release()             # ================região critica================== # Final se encontrar sala
-    conn.send(struct.pack('>IIII', 1, sala.port, 0, len(sala.ip))) ### Envia 1 para indicar que há sala disponível, a porta da sala, erro = 0
+    conn.send(struct.pack('!IIII', 1, sala.port, 0, len(sala.ip))) ### Envia 1 para indicar que há sala disponível, a porta da sala, erro = 0
     conn.send(sala.ip.encode())                                    ### E ip da sala para o cliente        
     ### Ponto 3 sala
     conn.close()
