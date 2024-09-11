@@ -69,9 +69,13 @@ def main():
     if(op == 0):
         print("Erro: ", error, " - ", mensagem) ### Conexão com a sala não foi possível
         socket_servidor_adm.close()             ### Fecha o socket de comunicação com o servidor de administração
+
+
     else:
+        ### Ip e porta da sala adquiridos com sucesso ###
+
         socket_servidor_adm.close()             ### Fecha o socket de comunicação com o servidor de administração
-        print("Conectado a sala de ip: ", mensagem, " e porta: ", port)
+        print("Conectando a sala de ip: ", mensagem, " e porta: ", port)
         socket_sala = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         socket_sala.connect((mensagem, port))   ### Conecta a sala de jogo
         print("Conectado a sala de jogo")
@@ -79,19 +83,30 @@ def main():
 
         conexão = True
         while conexão:
+
+                # ========================================= #
+                # |op (int 4 bytes)| mensagem(int 4 bytes)| #           
+                # |    mapa jogador (100 int 4 bytes)     | #           # Mensagem recebida da sala de jogo #
+                # |  mapa adversario (100 int 4 bytes)    | #           
+                # ========================================= #
+
             op, mensagem, mapa_jogador, mapa_adversario = struct.unpack('!II100I100I', socket_sala.recv(808))
+
+
             if(op == 1):              ### Jogador escolhe aonde irá colocar o Navio ###
                 printa_mapa(mapa_jogador)
                 orientacao = int(input("Digite 0 para orientação original e 1 para invertida: "))
                 coluna = int(input("Digite a posição na coluna: "))
                 linha = int(input("Digite a posição na linha: "))
                 cabecalho = struct.pack('!IIII', 1, coluna, linha, orientacao, len(nome))
+
             elif(op == 2):              ### Jogador realiza um disparo ###
                 printa_mapa(mapa_jogador)
                 printa_mapa(mapa_adversario)
                 coluna = int(input("Digite a posição na coluna para realizar um disparo: "))
                 linha = int(input("Digite a posição na linha para realizar um disparo: "))
                 cabecalho = struct.pack('!IIII', 2, coluna, linha, 0, len(nome))
+
             elif(op == 3):              ### Jogo acabou ###
                 if mensagem == 1:
                     print("O jogo acabou, você ganhou")
@@ -103,8 +118,16 @@ def main():
                 printa_mapa(mapa_adversario)
                 conexão = False
                 break
+
             elif(op == 4):              ### Jogador decide qual será o tipo do jogo ###
                 tipo_do_jogo = int(input("Escolha qual o tipo do jogo que deseja jogar\n\tDigite 1 para batalhar com: 1 navio de cada tipo\n\tDigite 2 para batalhar com 2 navios do tipo um e dois e 1 navio do tipo 3 e 4"))
                 cabecalho = struct.pack('!IIII', 4, 0, 0, tipo_do_jogo, len(nome))
             
-            socket_sala.send(cabecalho + nome)      ### Envia a mensagem para a sala de jogo
+
+                # ================================================ #        # ======================================================================== #
+                # | op (int 4 bytes)|    coluna (int 4 bytes)    | #        # op indica qual operação será realizada, coluna e linha indicam a posição #
+                # | linha (int 4 bytes)| orientacao (int 4 bytes)| #        # se op == 1 orientacao indica a orientação do navio                       #
+                # | size (int 4 bytes) |   nome (string size)    | #        # se op == 4 orientacao indica o tipo do jogo que será jogado              #
+                # ================================================ #        # ======================================================================== #
+
+            socket_sala.send(cabecalho + nome)      ### Envia a mensagem para a sala de jogo ###
