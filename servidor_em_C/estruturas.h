@@ -51,10 +51,10 @@ struct mapa {
 };
 // Definição da estrutura admin_data
 struct admin_data {
-    int op;         // Operação
-    int port;       // Porta
-    int error;      // Código de erro
-    int ip_size;    // Tamanho do IP
-    char* ip;       // IP em formato UTF-8
-    int admin_socket; // Socket de conexão com o servidor de administração
+    int op;             // Operação
+    int port;           // Porta
+    int error;          // Código de erro
+    int ip_size;        // Tamanho do IP
+    char* ip;           // IP em formato UTF-8
+    int admin_socket;   // Socket de conexão com o servidor de administração
 };

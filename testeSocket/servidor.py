@@ -1,10 +1,11 @@
 import socket
+import struct
 
 # Criação do socket TCP
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Bind do socket ao IP e porta
-server_socket.bind(('localhost', 12345))
+server_socket.bind(('localhost', 5000))
 
 # Coloca o socket em modo de escuta
 server_socket.listen(1)
@@ -14,9 +15,14 @@ while 1:
     client_socket, address = server_socket.accept()
     print(f"Conectado a {address}")
 
-    # Recebe dados do cliente
-    data = client_socket.recv(1024).decode('utf-8')
-    print(f"Recebido do cliente: {data}")
+    # Recebe dados do cliente (binário)
+    data = client_socket.recv(1024)
+    
+    # Desempacota os dados binários (big-endian)
+    op, port, error, ip_size = struct.unpack('!IIII', data[:16])  # 4 inteiros (op, port, error, ip_size)
+    ip = data[16:16+ip_size].decode('utf-8')    # Decodificar o IP de acordo com o tamanho
+    
+    print(f"Operação: {op}, Porta: {port}, Erro: {error}, IP: {ip}")
     
     # Envia resposta para o cliente
     response = "Olá, cliente!"

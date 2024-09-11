@@ -231,7 +231,7 @@ void* sala(void* arg)
         // Alocar e configurar os dados para a thread
     struct admin_data* data = malloc(sizeof(struct admin_data));
     data->op = 1; // Operação de criação de sala
-    data->port = 12345; // Porta da sala (exemplo)
+    data->port = 5000; // Porta da sala (exemplo)
     data->error = 0; // Código de erro
     data->ip = strdup("127.0.0.1"); // IP (UTF-8)
     data->ip_size = strlen(data->ip); // Tamanho do IP
@@ -267,26 +267,41 @@ void* sala(void* arg)
 void* comunicar_com_admin(void* arg) {
 
     struct admin_data* data = (struct admin_data*)arg;
-    
+
     // Montar o cabeçalho seguindo o formato 
     int buffer_size = 4 * sizeof(int) + data->ip_size;
-    char buffer[buffer_size];
+    char* buffer = malloc(buffer_size); // Aloca o buffer dinamicamente
 
-    memcpy(buffer, &data->op, sizeof(int));                  // Copiar operação
-    memcpy(buffer + sizeof(int), &data->port, sizeof(int));  // Copiar porta
-    memcpy(buffer + 2 * sizeof(int), &data->error, sizeof(int));  // Copiar código de erro
-    memcpy(buffer + 3 * sizeof(int), &data->ip_size, sizeof(int)); // Copiar o tamanho do IP
-    memcpy(buffer + 4 * sizeof(int), data->ip, data->ip_size);     // Copiar o IP
+    if (buffer == NULL) {
+        perror("Erro ao alocar memória para o buffer");
+        pthread_exit(NULL);
+    }
+
+    // Converter os dados para big-endian
+    int net_op = htonl(data->op); 
+    int net_port = htonl(data->port);
+    int net_error = htonl(data->error);
+    int net_ip_size = htonl(data->ip_size);
+
+    memcpy(buffer, &data->op, sizeof(int));                         // Copiar operação
+    memcpy(buffer + sizeof(int), &data->port, sizeof(int));         // Copiar porta
+    memcpy(buffer + 2 * sizeof(int), &data->error, sizeof(int));    // Copiar código de erro
+    memcpy(buffer + 3 * sizeof(int), &data->ip_size, sizeof(int));  // Copiar o tamanho do IP
+    memcpy(buffer + 4 * sizeof(int), data->ip, data->ip_size);      // Copiar o IP
 
     // Enviar os dados para o servidor de administração
     if (send(data->admin_socket, buffer, buffer_size, 0) < 0) {
         perror("Erro ao enviar dados ao servidor de administração");
+        free(buffer); // Libera o buffer antes de sair
         close(data->admin_socket);
         pthread_exit(NULL);
     }
 
     printf("Dados enviados ao servidor de administração: op=%d, port=%d, error=%d, ip=%s\n", 
            data->op, data->port, data->error, data->ip);
+
+    // Libera a memória alocada para o buffer
+    free(buffer);
 
     // Encerrar a conexão e a thread
     close(data->admin_socket);
