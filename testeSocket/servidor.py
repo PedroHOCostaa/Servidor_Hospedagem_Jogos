@@ -22,11 +22,15 @@ while 1:
     ip = client_socket.recv(size).decode('utf-8')    # Decodificar o IP de acordo com o tamanho
     
     print(f"Operação: {op}, Porta: {port}, Erro: {error}, IP: {ip}")
-    
+    if op == 0:
+        if error == -1:
+            print("erro na tua mae")
+        else:
+            print("erro na tua tia")
+        print(f"operação 0 -> {error}")
     # Envia resposta para o cliente
-    response = "Olá, cliente!"
+    response = "Minha tia não!"
     client_socket.send(response.encode('utf-8'))
-
 # Fecha a conexão
 client_socket.close()
 server_socket.close()

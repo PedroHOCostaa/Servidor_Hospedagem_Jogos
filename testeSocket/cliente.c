@@ -27,7 +27,8 @@ void comunicar_com_admin(struct admin_data* data) {
         perror("Erro ao alocar memória para o buffer");
         pthread_exit(NULL);
     }
-
+    data->op = 0; // Operação de criação de sala
+    data->error = -2; // Código de erro
     // Converter os dados para big-endian
     int net_op = htonl(data->op); 
     int net_port = htonl(data->port);
@@ -53,7 +54,7 @@ void comunicar_com_admin(struct admin_data* data) {
 
     // Libera a memória alocada para o buffer
     free(buffer);
-
+    recv(data->admin_socket, &data->error, sizeof(int), 0); // Receber o código de erro
     // Encerrar a conexão e a thread
     close(data->admin_socket);
     pthread_exit(NULL);
