@@ -5,6 +5,7 @@ struct navio;
 struct celula;
 struct mapa;
 struct no;
+struct admin_data;
 
 void inserirFinalLista(struct no* lista, struct navio* novonavio);
 int inicializaNavio(struct navio* novoNavio, int tipo, int orientacao);
@@ -47,4 +48,13 @@ struct mapa {
     int numBarcos;
     struct celula tabuleiro[10][10];
     char mapaAdversario[10][10];
+};
+// Definição da estrutura admin_data
+struct admin_data {
+    int op;         // Operação
+    int port;       // Porta
+    int error;      // Código de erro
+    int ip_size;    // Tamanho do IP
+    char* ip;       // IP em formato UTF-8
+    int admin_socket; // Socket de conexão com o servidor de administração
 };
