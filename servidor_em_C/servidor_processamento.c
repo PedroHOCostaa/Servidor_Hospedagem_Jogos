@@ -13,7 +13,7 @@
 #define PORT "5000"
 #define HOST "127.0.0.1"       // IP do servidor admin
 #define SALAS 5
-#define MEU_IP "192.168.18.23" // IP do servidor 
+#define MEU_IP "192.168.18.10" // IP do servidor 
 
 int jogadoresNaSalas[SALAS];
 

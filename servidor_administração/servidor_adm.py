@@ -78,12 +78,11 @@ def thread_handle_sala(conn, addr):
         
 def thread_salas():
     socket_salas = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    socket_salas.bind(('localhost', 5000))
+    socket_salas.bind(('127.0.0.1', 5000))
     socket_salas.listen()
     
     while True:
         conn, addr = socket_salas.accept()  ### Ponto 1 sala
-        print("Sala conectada\n")
         thread_handle = threading.Thread(target=thread_handle_sala, args=(conn, addr))
         thread_handle.start()
         lista_thrads_servidor.append(thread_handle)
