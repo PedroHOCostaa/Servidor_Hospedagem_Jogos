@@ -228,13 +228,16 @@ void* sala(void* arg)
 
     printf("Conectado ao servidor de administração.\n");
 
-    // Cria uma thread para se comunicar com o servidor de administração
-    pthread_t thread_admin;
-    if (pthread_create(&thread_admin, NULL, comunicar_com_admin, (void*)&admin_socket) != 0) {
-        perror("Erro ao criar a thread para o servidor de administração");
-        close(admin_socket);
-        return NULL;
-    }
+        // Alocar e configurar os dados para a thread
+    struct admin_data* data = malloc(sizeof(struct admin_data));
+    data->op = 1; // Operação de criação de sala
+    data->port = 12345; // Porta da sala (exemplo)
+    data->error = 0; // Código de erro
+    data->ip = strdup("127.0.0.1"); // IP (UTF-8)
+    data->ip_size = strlen(data->ip); // Tamanho do IP
+    data->admin_socket = admin_socket; // Socket de conexão com o servidor de administração
+    
+    comunicar_com_admin(data);
 
     /// Cria um socket para se conectar com o servidor de administração, ao se conectar com o servidor
     /// Ele ao receber a conexão cria uma thread que irá se comunicar com está
@@ -262,19 +265,10 @@ void* sala(void* arg)
 }
 
 void* comunicar_com_admin(void* arg) {
-    // Estrutura de dados contendo os parâmetros para o envio ao admin
-    struct admin_data {
-        int op;         // Operação
-        int port;       // Porta
-        int error;      // Código de erro
-        int ip_size;    // Tamanho do IP
-        char* ip;       // IP em formato UTF-8
-        int admin_socket; // Socket de conexão com o servidor de administração
-    };
 
     struct admin_data* data = (struct admin_data*)arg;
-
-    // Montar o cabeçalho seguindo o formato especificado
+    
+    // Montar o cabeçalho seguindo o formato 
     int buffer_size = 4 * sizeof(int) + data->ip_size;
     char buffer[buffer_size];
 
