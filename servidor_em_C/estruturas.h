@@ -59,3 +59,22 @@ struct admin_data {
     char* ip;           // IP em formato UTF-8
     int admin_socket;   // Socket de conexão com o servidor de administração
 };
+// Definição da estrutura cliente_para_servidor
+// Nessa estrutura o cliente envia dados à sala do servidor de processamento
+struct cliente_para_servidor {
+    int op;             // Operação
+    int coluna;         // Coluna
+    int linha;          // linha
+    int orientacao;     // Orientação
+    int size_nome;      // Tamanho do nome do jogador
+    char* nome_jogador; // Nome do jogador
+};
+
+// Definição da estrutura servidor_para_cliente
+// Nessa estrutura o servidor envia dados ao cliente
+struct servidor_para_cliente {
+    int op;                     // Operação
+    int mensagem;               // Resultado da operação
+    int mapa_jogador[100];      // mapa do jogador 
+    int mapa_adversario[100];   // mapa do adversario
+};

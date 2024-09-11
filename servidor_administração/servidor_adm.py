@@ -167,3 +167,5 @@ def ligar_servidor():
     thread_espera_clientes.start()
     while True:
         pass
+
+ligar_servidor()
