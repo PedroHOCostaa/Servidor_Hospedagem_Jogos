@@ -10,8 +10,9 @@
 #include "estruturas.h"
 
 #define PORT "65430"
-#define HOST "127.0.0.1"
+#define HOST "127.0.0.1"       // IP do servidor admin
 #define SALAS 5
+#define MEU_IP "192.168.18.23" // IP do servidor 
 
 int jogadoresNaSalas[SALAS];
 
@@ -201,10 +202,11 @@ void jogo()
     printf("Fim de jogo\n Jogador %d venceu!!!/n", vencedor);
 }
 
+
 void* sala(void* arg)
 {
  struct sockaddr_in endereco_servidor_admin;
-    int id_sala = *((int*)arg);
+    int porta_sala = *((int*)arg); // Porta da sala
     free(arg);
 
     // Ponto 1: Criação do socket para o servidor de administração
@@ -228,14 +230,14 @@ void* sala(void* arg)
 
     printf("Conectado ao servidor de administração.\n");
 
-        // Alocar e configurar os dados para a thread
+    // Alocar e configurar os dados para a thread
     struct admin_data* data = malloc(sizeof(struct admin_data));
-    data->op = 1; // Operação de criação de sala
-    data->port = 5000; // Porta da sala (exemplo)
-    data->error = 0; // Código de erro
-    data->ip = strdup("127.0.0.1"); // IP (UTF-8)
-    data->ip_size = strlen(data->ip); // Tamanho do IP
-    data->admin_socket = admin_socket; // Socket de conexão com o servidor de administração
+    data->op = 1;                       // Operação de criação de sala
+    data->port = porta_sala;            // Porta da sala (exemplo)
+    data->error = 0;                    // Código de erro
+    data->ip = strdup("127.0.0.1");     // IP (UTF-8)
+    data->ip_size = strlen(data->ip);   // Tamanho do IP
+    data->admin_socket = admin_socket;  // Socket de conexão com o servidor de administração
     
     comunicar_com_admin(data);
 
@@ -263,7 +265,9 @@ void* sala(void* arg)
     }
 
 }
-
+/// @brief      Função para comunicação com o servidor de administração
+/// @param data Estrutura com os dados para comunicação
+/// @return     void
 void comunicar_com_admin(struct admin_data* data) {
 
 
@@ -305,12 +309,14 @@ void comunicar_com_admin(struct admin_data* data) {
 }
 int main()
 {
+    int porta = 0;
     pthread_t threads[SALAS];
-
+    printf("Digite a porta inicial do servidor: ");
+    scanf("%d", &porta);
     for(int i = 0; i < SALAS; i++)
     {
         int* arg = malloc(sizeof(int));
-        *arg = i;
+        *arg = porta + i;
         printf("Criando sala %d\n", i);
         pthread_create(&threads[i], NULL, sala, (void*)arg);    // Cria uma thread para cada sala
         jogadoresNaSalas[i] = 0;

@@ -136,21 +136,21 @@ void acertaNavio(struct navio* navio, int coluna, int linha)
 /// @return                 Retorna 0 se o tiro acertou a agua, 1 se o tiro acertou um navio
 int atira(struct mapa* meuMapa, int coluna, int linha)
 {
-    if(meuMapa->tabuleiro[coluna][linha].indicador == 1)
+    if(meuMapa->tabuleiro[coluna][linha].indicador == 1) // Se a posição do tiro é um navio
     {
-        struct navio* navioAlvo = meuMapa->tabuleiro[coluna][linha].superficie;
-        acertaNavio(navioAlvo, coluna, linha);
-        meuMapa->mapaAdversario[coluna][linha] = 'N';
+        struct navio* navioAlvo = meuMapa->tabuleiro[coluna][linha].superficie; // Pega o navio que foi atingido
+        acertaNavio(navioAlvo, coluna, linha);          // Marca na estrutura do navio qual parte foi acertada
+        meuMapa->mapaAdversario[coluna][linha] = 'N';   // N: Tiro em um navio
         return 1;           // 1: Tiro em um navio
     }
-    meuMapa->mapaAdversario[coluna][linha] = 'A';
+    meuMapa->mapaAdversario[coluna][linha] = 'A'; // A: Tiro na água
     return 0;               // 0: Tiro na água
 }
 
 /// @brief                  Verifica a estrutura de um navio se ele ainda possuin partes não destruidas
 /// @param meuMapa          Ponteiro para o navio que terá a integridade verificada
 /// @return                 Retorna 0 se o navio ainda permanece na superficie, 1 se o navio foi afundado
-int verificarEstrtura(struct navio* navio)
+int verificarEstrutura(struct navio* navio)
 {
     for(int i = 0; i < navio->tamanhoColuna; i++)
     {
@@ -168,7 +168,7 @@ int verificarEstrtura(struct navio* navio)
 /// @brief                  Pinta a estrutura do navio no mapa do jogador adversario, está função é chamada ao um navio ser completamente atingido
 /// @param meuMapa          Ponteiro para o mapa do jogador que terá a estrutura do navio pintada no mapa adversario 
 /// @param navio            Ponteiro do navio que foi destruido
-void pintaestrutura(struct mapa* meuMapa, struct navio* navio)
+void pintaEstrutura(struct mapa* meuMapa, struct navio* navio)
 {
     for(int i = 0; i < navio->tamanhoColuna; i++)
     {
@@ -191,9 +191,9 @@ int realizarTiro(struct mapa* meuMapa, int coluna, int linha)
     {
         struct navio* navioAlvo = meuMapa->tabuleiro[coluna][linha].superficie;
     
-        if(verificarEstrtura(navioAlvo) == 1)   
+        if(verificarEstrutura(navioAlvo) == 1)   
         {
-            pintaestrutura(meuMapa, navioAlvo);
+            pintaEstrutura(meuMapa, navioAlvo);
             navioAlvo->estado = 0;
             return 2;       // 2: Tipo acertado e navio destruido
         }    
