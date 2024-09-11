@@ -56,7 +56,7 @@ def printa_mapa(mapa):
 
 
 def main():
-    
+    print("inicio")
     socket_servidor_adm = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     socket_servidor_adm.connect(endereco_servidor_adm)
     print("Conectado ao servidor de administração\n")
@@ -131,3 +131,5 @@ def main():
                 # ================================================ #        # ======================================================================== #
 
             socket_sala.send(cabecalho + nome)      ### Envia a mensagem para a sala de jogo ###
+
+main()
