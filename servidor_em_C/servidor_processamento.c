@@ -30,7 +30,7 @@ int realizarTiroJogador(struct mapa* mapaAdversario)
 }
 
 
-void jogo()
+void jogo(int jogador1, int jogador2)
 {
 
     //Inicialização do mapa do jogo//
@@ -206,7 +206,7 @@ void jogo()
 
 void* sala(void* arg)
 {
- struct sockaddr_in endereco_servidor_admin;
+    struct sockaddr_in endereco_servidor_admin;
     int porta_sala = *((int*)arg); // Porta da sala
     char* ip_sala = MEU_IP; // IP da sala
     free(arg);
@@ -237,7 +237,7 @@ void* sala(void* arg)
     data->op = 1;                           // Operação de criação de sala
     data->port = porta_sala;                // Porta da sala (exemplo)
     data->error = 0;                        // Código de erro
-    data->ip_size = strlen(data->ip);       // Tamanho do IP
+    data->ip_size = strlen(ip_sala);        // Tamanho do IP
     data->ip = malloc(strlen(ip_sala) + 1); // Alocar memória para o IP
     strcpy(data->ip, ip_sala);              // Copiar o IP para a estrutura de dados
     data->admin_socket = admin_socket;      // Socket de conexão com o servidor de administração
@@ -255,7 +255,7 @@ void* sala(void* arg)
     struct sockaddr_in communication_address;
     communication_address.sin_family = AF_INET;
     communication_address.sin_port = htons(porta_sala);
-    communication_address.sin_addr.s_addr = ip_sala;
+    communication_address.sin_addr.s_addr = inet_addr(ip_sala); // Conversão correta do IP
 
     // Vincula o socket à porta especificada
     if (bind(communication_socket, (struct sockaddr*)&communication_address, sizeof(communication_address)) < 0) {
@@ -276,9 +276,6 @@ void* sala(void* arg)
 
 
     // Fecha o socket de comunicação
-    /// Envia para a thread do servidor de administração o id desta sala e a porta que irá esperar uma conexão de cliente
-    /// Ponto 2
-
     while(1)    
     {
         printf("Aguardando conexões de clientes na porta %d\n", data->port);
@@ -304,14 +301,14 @@ void* sala(void* arg)
 
         printf("Conexão estabelecida com o jogador 2.\n");
         
-        jogo();
+        jogo(client_socket, client_socket2); // Função do jogo 
 
-            /// avisa para o servidor de administração que a sala está vazia e retorna quem ganhou ou se houve erro
-            /// Ponto 4
+        /// avisa para o servidor de administração que a sala está vazia e retorna quem ganhou ou se houve erro
     }
 
     close(communication_socket);
 }
+
 /// @brief      Função para comunicação com o servidor de administração
 /// @param data Estrutura com os dados para comunicação
 /// @return     void
