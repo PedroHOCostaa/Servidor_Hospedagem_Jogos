@@ -22,10 +22,10 @@ lista_thrads_servidor = []
 
 ### Cliente -> Servidor de administração
 
-# ===================================================== #
-# | op (int 4 bytes)| jogo selecionado (int 4 bytes)  | #
-# | size (int 4 bytes) |      nome (string size bytes)| #
-# ===================================================== #
+# ====================================================== #
+# | op (int 4 bytes)| jogo selecionado (int 4 bytes)  |  #
+# | size (int 4 bytes) | nome (string utf-8 size bytes)| #
+# ====================================================== #
 
 ### Servidor de processamento -> Servidor de administração
 
