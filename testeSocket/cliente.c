@@ -91,7 +91,7 @@ void* sala(void* arg) {
     data->op = 1; // Operação de criação de sala
     data->port = 12345; // Porta da sala (exemplo)
     data->error = 0; // Código de erro
-    data->ip = strdup("127.0.0.1"); // IP (UTF-8)
+    data->ip = strdup("127.0.1.1"); // IP (UTF-8)
     data->ip_size = strlen(data->ip); // Tamanho do IP
     data->admin_socket = admin_socket; // Socket de conexão com o servidor de administração
     
