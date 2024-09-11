@@ -41,10 +41,10 @@ def main():
     else:
         socket_servidor_adm.close()             ### Fecha o socket de comunicação com o servidor de administração
         print("Conectado a sala de ip: ", endereco_servidor_adm[0], " e porta: ", port)
-        print("Aguarde o inicio do jogo")
         socket_sala = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         socket_sala.connect((mensagem, port))   ### Conecta a sala de jogo
         print("Conectado a sala de jogo")
-
+        print("Aguarde o inicio do jogo")
+        
 
     
