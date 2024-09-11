@@ -264,9 +264,8 @@ void* sala(void* arg)
 
 }
 
-void* comunicar_com_admin(void* arg) {
+void comunicar_com_admin(struct admin_data* data) {
 
-    struct admin_data* data = (struct admin_data*)arg;
 
     // Montar o cabeçalho seguindo o formato 
     int buffer_size = 4 * sizeof(int) + data->ip_size;
@@ -303,9 +302,6 @@ void* comunicar_com_admin(void* arg) {
     // Libera a memória alocada para o buffer
     free(buffer);
 
-    // Encerrar a conexão e a thread
-    close(data->admin_socket);
-    pthread_exit(NULL);
 }
 int main()
 {

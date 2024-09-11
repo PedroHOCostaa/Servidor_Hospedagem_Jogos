@@ -16,7 +16,7 @@ while 1:
     print(f"Conectado a {address}")
 
     # Recebe dados do cliente (binário)
-    op, resultado, error, size = struct.unpack('!IIII', client_socket.recv(16))  # 4 inteiros (op, port, error, ip_size)
+    op, port, error, size = struct.unpack('!IIII', client_socket.recv(16))  # 4 inteiros (op, port, error, ip_size)
     
     # Desempacota os dados binários (big-endian)
     ip = client_socket.recv(size).decode('utf-8')    # Decodificar o IP de acordo com o tamanho

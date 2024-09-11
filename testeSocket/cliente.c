@@ -16,8 +16,8 @@ struct admin_data {
 };
 
 // Função para comunicação com o servidor de administração
-void* comunicar_com_admin(void* arg) {
-    struct admin_data* data = (struct admin_data*)arg;
+void comunicar_com_admin(struct admin_data* data) {
+    
 
     // Montar o cabeçalho seguindo o formato 
     int buffer_size = 4 * sizeof(int) + data->ip_size;
