@@ -234,8 +234,8 @@ void* sala(void* arg)
 
     // Alocar e configurar os dados para a thread
     struct admin_data* data = malloc(sizeof(struct admin_data));
-    data->op = 1;                           // Operação de criação de sala
-    data->port = porta_sala;                // Porta da sala (exemplo)
+    data->op = htonl(1);                           // Operação de criação de sala
+    data->port = htonl(porta_sala);                // Porta da sala (exemplo)
     data->error = 0;                        // Código de erro
     data->ip_size = strlen(ip_sala);        // Tamanho do IP
     data->ip = malloc(strlen(ip_sala) + 1); // Alocar memória para o IP

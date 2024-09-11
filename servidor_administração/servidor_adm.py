@@ -48,7 +48,8 @@ def thread_handle_sala(conn, addr):
     op, port, error, size = struct.unpack('!IIII', conn.recv(16))   ### Ponto 2 sala op == 1 pois indica que uma sala acabou de ser aberta
     ip = conn.recv(size).decode()       # Decodifica o ip para utf-8
     
-    
+    print("Sala de ip: ", ip, " e porta: ", port, " conectada\n, operação: ", op, "\n")
+
     sala_atual = Sala(ip, port, port)   # Cria o objeto sala da sala que acabou de se conectar
                                                     
     semaforo1.acquire()             # ================região critica================== #
