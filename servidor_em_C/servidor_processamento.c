@@ -207,6 +207,7 @@ void* sala(void* arg)
 {
  struct sockaddr_in endereco_servidor_admin;
     int porta_sala = *((int*)arg); // Porta da sala
+    char* ip_sala = MEU_IP; // IP da sala
     free(arg);
 
     // Ponto 1: Criação do socket para o servidor de administração
@@ -235,19 +236,15 @@ void* sala(void* arg)
     data->op = 1;                       // Operação de criação de sala
     data->port = porta_sala;            // Porta da sala (exemplo)
     data->error = 0;                    // Código de erro
-    data->ip = strdup("127.0.0.1");     // IP (UTF-8)
+    data->ip = strdup(ip_sala);         // IP (UTF-8)
     data->ip_size = strlen(data->ip);   // Tamanho do IP
     data->admin_socket = admin_socket;  // Socket de conexão com o servidor de administração
     
-    comunicar_com_admin(data);
 
-    /// Cria um socket para se conectar com o servidor de administração, ao se conectar com o servidor
-    /// Ele ao receber a conexão cria uma thread que irá se comunicar com está
-    /// Ponto 1
-    
     /// Cria um socket para esperar conexões do servidor de comunicação
     /// Envia para a thread do servidor de administração o id desta sala e a porta que irá esperar uma conexão de cliente
     /// Ponto 2
+    comunicar_com_admin(data);
 
     while(1)    
     {
