@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -9,7 +10,7 @@
 #include <pthread.h>
 #include "estruturas.h"
 
-#define PORT "65430"
+#define PORT "5000"
 #define HOST "127.0.0.1"       // IP do servidor admin
 #define SALAS 5
 #define MEU_IP "192.168.18.23" // IP do servidor 
@@ -233,34 +234,83 @@ void* sala(void* arg)
 
     // Alocar e configurar os dados para a thread
     struct admin_data* data = malloc(sizeof(struct admin_data));
-    data->op = 1;                       // Operação de criação de sala
-    data->port = porta_sala;            // Porta da sala (exemplo)
-    data->error = 0;                    // Código de erro
-    data->ip = strdup(ip_sala);         // IP (UTF-8)
-    data->ip_size = strlen(data->ip);   // Tamanho do IP
-    data->admin_socket = admin_socket;  // Socket de conexão com o servidor de administração
+    data->op = 1;                           // Operação de criação de sala
+    data->port = porta_sala;                // Porta da sala (exemplo)
+    data->error = 0;                        // Código de erro
+    data->ip_size = strlen(data->ip);       // Tamanho do IP
+    data->ip = malloc(strlen(ip_sala) + 1); // Alocar memória para o IP
+    strcpy(data->ip, ip_sala);              // Copiar o IP para a estrutura de dados
+    data->admin_socket = admin_socket;      // Socket de conexão com o servidor de administração
     
 
     /// Cria um socket para esperar conexões do servidor de comunicação
+    int communication_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (communication_socket < 0) {
+        perror("Erro ao criar o socket para o servidor de comunicação");
+        close(data->admin_socket);
+        pthread_exit(NULL);
+    }
+
+    // Configuração do endereço do servidor de comunicação
+    struct sockaddr_in communication_address;
+    communication_address.sin_family = AF_INET;
+    communication_address.sin_port = htons(porta_sala);
+    communication_address.sin_addr.s_addr = ip_sala;
+
+    // Vincula o socket à porta especificada
+    if (bind(communication_socket, (struct sockaddr*)&communication_address, sizeof(communication_address)) < 0) {
+        perror("Erro ao vincular o socket à porta");
+        close(communication_socket);
+        close(data->admin_socket);
+        pthread_exit(NULL);
+    }
+
+    // Aguarda conexões de clientes
+    if (listen(communication_socket, 1) < 0) {
+        perror("Erro ao aguardar conexões de clientes");
+        close(communication_socket);
+        close(data->admin_socket);
+        pthread_exit(NULL);
+    }
+    comunicar_com_admin(data); // Comunicação com o servidor de administração
+
+
+    // Fecha o socket de comunicação
     /// Envia para a thread do servidor de administração o id desta sala e a porta que irá esperar uma conexão de cliente
     /// Ponto 2
-    comunicar_com_admin(data);
 
     while(1)    
     {
-        /// Ponto 3 primeiro jogador
-        /// Aceita uma conexão do servidor de comunicação
-        /// Avisa que a sala está em espera de um jogador
+        printf("Aguardando conexões de clientes na porta %d\n", data->port);
 
-        /// Ponto 3 segundo jogador
-        /// Aceita uma segunda conexão com o servidor de comunicaçãp
+        // Aceita uma conexão do servidor de comunicação
+        int client_socket = accept(communication_socket, NULL, NULL);
+        if (client_socket < 0) {
+            perror("Erro ao aceitar conexão do servidor de comunicação");
+            close(communication_socket);
+            close(data->admin_socket);
+            pthread_exit(NULL);
+        }
 
+        printf("Conexão estabelecida com o jogador 1.\n");
+
+        int client_socket2 = accept(communication_socket, NULL, NULL);
+        if (client_socket2 < 0) {
+            perror("Erro ao aceitar conexão do servidor de comunicação");
+            close(communication_socket);
+            close(data->admin_socket);
+            pthread_exit(NULL);
+        }
+
+        printf("Conexão estabelecida com o jogador 2.\n");
+        
         jogo();
 
-        /// avisa para o servidor de administração que a sala está vazia e retorna quem ganhou ou se houve erro
-        /// Ponto 4
+            /// avisa para o servidor de administração que a sala está vazia e retorna quem ganhou ou se houve erro
+            /// Ponto 4
     }
 
+    close(communication_socket);
 }
 /// @brief      Função para comunicação com o servidor de administração
 /// @param data Estrutura com os dados para comunicação

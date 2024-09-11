@@ -21,6 +21,7 @@ void imprimirMapaAdversario(struct mapa* meuMapa);
 void imprimeNavio(struct navio* navio);
 int verificaPerdedor(struct mapa* meuMapa);
 int vefificaPerdedorAux(struct no* lista);
+void comunicar_com_admin(struct admin_data* data);
 
 
 /// @brief      Estrutura de lista encadeada

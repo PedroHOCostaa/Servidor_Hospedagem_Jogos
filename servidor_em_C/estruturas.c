@@ -147,7 +147,7 @@ int atira(struct mapa* meuMapa, int coluna, int linha)
     return 0;               // 0: Tiro na água
 }
 
-/// @brief                  Verifica a estrutura de um navio se ele ainda possuin partes não destruidas
+/// @brief                  Verifica a estrutura de um navio se ele ainda possui partes não destruidas
 /// @param meuMapa          Ponteiro para o navio que terá a integridade verificada
 /// @return                 Retorna 0 se o navio ainda permanece na superficie, 1 se o navio foi afundado
 int verificarEstrutura(struct navio* navio)
