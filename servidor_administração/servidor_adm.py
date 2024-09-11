@@ -110,7 +110,9 @@ def thread_handle_cliente(conn, addr):
     sala = procura_sala_vaga()      
     if sala is None:
         semaforo1.release()         # ================região critica================== # Final se não encontrar sala
-        conn.send(struct.pack('>II', 0, 0)) ### Envia 0 para indicar que não há sala disponível
+        mensagem =  "Não há salas disponíveis no momento".encode()
+        conn.send(struct.pack('>II', 0, 0, 44, len(mensagem))) ### Envia 0 para indicar que não há sala disponível
+        conn.send(mensagem)                           ### Envia a mensagem de erro para o cliente
         conn.close()
         return
     sala.estado = sala.estado + 1
