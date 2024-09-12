@@ -26,17 +26,29 @@ A arquitetura do projeto foi definida com base na "ILustração da arquitetura",
 
 Com base na ilustração, depreende-se que a arquitetura é cocmposta por três principais componentes interconectados:
 
-1. **Servidor Mestre** (ou Servidor de Administração):
-  - Gerencia as solicitações dos clientes e coordena a criação e o estado das salas de jogos.
-  - Mantém uma lista de salas disponíveis e envia o endereço da sala para os clientes.
-  
-2. **Servidor de Processamento:**
-  - Cria e gerencia salas de jogos e aguarda conexões dos clientes.
-  - Inicia o jogo quando dois clientes se conectam e gerencia a comunicação entre eles durante o jogo.
-  
-3. **Cliente:**
-  - Solicita uma sala ao Servidor Mestre e, após receber o endereço, conecta-se ao Servidor de Processamento para jogar.
-  - Participa do jogo de Batalha Naval interagindo com o servidor de processamento.
+## 1. Servidor Mestre (ou Servidor de Administração)
+
+- **Função:** Gerencia as solicitações dos clientes e coordena a criação e o estado das salas de jogos.
+- **Responsabilidades:**
+  - Mantém uma lista de salas disponíveis.
+  - Envia o endereço da sala para os clientes.
+  - Atualiza o estado das salas e notifica sobre novos jogos ou mudanças.
+
+## 2. Servidor de Processamento
+
+- **Função:** Cria e gerencia salas de jogos e aguarda conexões dos clientes.
+- **Responsabilidades:**
+  - Inicializa e gerencia as salas de jogos.
+  - Aguarda conexões dos clientes e inicia o jogo quando dois clientes estão conectados.
+  - Gerencia a comunicação entre os jogadores durante o jogo.
+
+## 3. Cliente
+
+- **Função:** Solicita uma sala ao Servidor Mestre e conecta-se ao Servidor de Processamento para jogar.
+- **Responsabilidades:**
+  - Solicita uma sala ao Servidor Mestre.
+  - Conecta-se ao Servidor de Processamento após receber o endereço da sala.
+  - Participa do jogo de Batalha Naval, interagindo com o servidor de processamento.
 
 ## Componentes do Sistema e Tecnologias
 
