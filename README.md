@@ -41,9 +41,12 @@ Após o jogador receber uma solicitação diferente de op = 3(jogo finalizado), 
 
 ### Cliente -> Sala
 
+### Cliente -> Sala
+
 | op (int 4 bytes) | coluna (int 4 bytes) | linha (int 4 bytes) | orientação (int 4 bytes) | size (int 4 bytes) | nome (string size) |
 |------------------|----------------------|---------------------|---------------------------|--------------------|---------------------|
 | op: Igual ao op da solicitação enviada para o cliente. | coluna: Valor no eixo y onde o tiro ou o navio será posicionado. | linha: Valor no eixo x onde o tiro ou o navio será posicionado. | orientação: Utilizada quando op = 1 (orientação do navio) ou op = 3 (tipo de jogo). | size: Tamanho do nome em UTF-8. | nome: Nome do cliente em UTF-8. |
+
 
 
 Esta troca de mensagem se repete nestá ordem até que o jogo acabe. Sala manda uma solicitação para o cliente, o cliente responde a solicitação com suas escolhas.
