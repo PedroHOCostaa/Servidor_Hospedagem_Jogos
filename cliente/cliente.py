@@ -103,7 +103,7 @@ def main():
                 # |    mapa jogador (100 int 4 bytes)     | #           # Mensagem recebida da sala de jogo #
                 # |  mapa adversario (100 int 4 bytes)    | #           
                 # ========================================= #
-
+            
             op, mensagem, mapa_jogador, mapa_adversario = struct.unpack('!II100I100I', socket_sala.recv(808))
 
 

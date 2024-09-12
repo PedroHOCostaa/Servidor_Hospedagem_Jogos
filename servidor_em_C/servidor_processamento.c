@@ -13,7 +13,7 @@
 #define PORT "5000"
 #define HOST "127.0.0.1"       // IP do servidor admin
 #define SALAS 5
-#define MEU_IP "127.0.0.1" // IP do servidor 
+#define MEU_IP "192.168.150.92" // IP do servidor 
 
 int jogadoresNaSalas[SALAS];
 
@@ -32,19 +32,29 @@ int realizarTiroJogador(struct mapa* mapaAdversario)
 
 void jogo(int jogador1, int jogador2)
 {
-
-    //Inicialização do mapa do jogo//
-
+    (void)jogador2; // Para indicar que o parâmetro não será utilizado
     struct mapa* mapaJogadorUm = (struct mapa*)malloc(sizeof(struct mapa));;
-    inicializaMapa(mapaJogadorUm);
     struct mapa* mapaJogadorDois = (struct mapa*)malloc(sizeof(struct mapa));;
-    inicializaMapa(mapaJogadorDois);
-
+    int mapaVazio[100] = {0}; // Inicializa o vetor com 100 posições vazias
     
-    int tipoJogo;
-    //Escolha do tipo de jogo//
-    printf("Digite o tipo do jogo\n");
-    scanf("%d", &tipoJogo);
+    int tipoJogo = 0;
+    
+    // Envia a solicitação para o cliente escolher o tipo de jogo
+    int op = 4; // Indica operação de escolha do tipo de jogo
+    int mensagem = 0; // Exemplo de mensagem inicial
+    int orientacao;
+    int jogadores[2] = {jogador1, jogador2}; // Cria um array com os jogadores
+    
+
+    int socket_cliente = jogadores[0]; // Pega o socket do jogador 1
+    
+    // Exemplo de uso da função
+    int mapa_jogador[100] = {0};  // Inicializa com 100 posições vazias
+    int mapa_adversario[100] = {0}; // Inicializa com 100 posições vazias
+    
+    enviarParaCliente(socket_cliente, op, mensagem, mapa_jogador, mapa_adversario);
+    
+    printf("Jogador 1 escolheu o tipo de jogo: %d\n", ntohl(tipoJogo));
     
 
     int qtdNavios[4], qtdNaviosJ1[4], qtdNaviosJ2[4], qtdTiros;
@@ -66,7 +76,7 @@ void jogo(int jogador1, int jogador2)
     }
     
 
-    int orientacao, ancoraColuna, ancoraLinha;
+    int ancoraColuna, ancoraLinha;
     struct navio* novoNavio;
     int criado = 0;
     
@@ -278,7 +288,7 @@ void* sala(void* arg)
     // Fecha o socket de comunicação
     while(1)    
     {
-        printf("Aguardando conexões de clientes na porta %d\n", data->port);
+        printf("Aguardando conexões de clientes na porta %d\n", ntohl(data->port));
 
         // Aceita uma conexão do servidor de comunicação
         int client_socket = accept(communication_socket, NULL, NULL);
@@ -345,12 +355,36 @@ void comunicar_com_admin(struct admin_data* data) {
     }
 
     printf("Dados enviados ao servidor de administração: op=%d, port=%d, error=%d, ip=%s\n", 
-           data->op, data->port, data->error, data->ip);
+           ntohl(data->op), ntohl(data->port), ntohl(data->error), data->ip);
 
     // Libera a memória alocada para o buffer
     free(buffer);
 
 }
+
+void enviarParaCliente(int socket, int op, int mensagem, int mapa_jogador[100], int mapa_adversario[100]) {
+    struct servidor_para_cliente dados;
+    
+    // Preenche a estrutura com os dados
+    dados.op = htonl(op);  // Converte para a ordem de bytes da rede
+    dados.mensagem = htonl(mensagem);
+    
+    // Converte os mapas para a ordem de bytes da rede
+    for (int i = 0; i < 100; ++i) {
+        dados.mapa_jogador[i] = htonl(mapa_jogador[i]);
+        dados.mapa_adversario[i] = htonl(mapa_adversario[i]);
+    }
+    
+    // Envia a estrutura para o cliente
+    ssize_t bytes_enviados = send(socket, &dados, sizeof(dados), 0);
+    if (bytes_enviados == -1) {
+        perror("Erro ao enviar dados para o cliente");
+        exit(EXIT_FAILURE);
+    }
+    
+    printf("Dados enviados para o cliente. Bytes enviados: %zd\n", bytes_enviados);
+}
+
 int main()
 {
     int porta = 0;

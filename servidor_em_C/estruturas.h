@@ -22,6 +22,7 @@ void imprimeNavio(struct navio* navio);
 int verificaPerdedor(struct mapa* meuMapa);
 int vefificaPerdedorAux(struct no* lista);
 void comunicar_com_admin(struct admin_data* data);
+void enviarParaCliente(int socket, int op, int mensagem, int mapa_jogador[100], int mapa_adversario[100]);
 
 
 /// @brief      Estrutura de lista encadeada
@@ -64,10 +65,10 @@ struct admin_data {
 struct cliente_para_servidor {
     int op;             // Operação
     int coluna;         // Coluna
-    int linha;          // linha
+    int linha;          // Linha
     int orientacao;     // Orientação
     int size_nome;      // Tamanho do nome do jogador
-    char* nome_jogador; // Nome do jogador
+    char nome_jogador[256]; // Nome do jogador (tamanho fixo para simplificar)
 };
 
 // Definição da estrutura servidor_para_cliente
@@ -75,6 +76,6 @@ struct cliente_para_servidor {
 struct servidor_para_cliente {
     int op;                     // Operação
     int mensagem;               // Resultado da operação
-    int mapa_jogador[100];      // mapa do jogador 
-    int mapa_adversario[100];   // mapa do adversario
+    int mapa_jogador[100];      // Mapa do jogador 
+    int mapa_adversario[100];   // Mapa do adversário
 };
