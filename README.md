@@ -1,4 +1,19 @@
-# Servidor_Hospedagem_Jogos
+# Projeto de Sistemas Distribuídos - Jogo de Batalha Naval
+
+Este projeto é um sistema distribuído para a hospedagem de salas de jogos, especificamente para o jogo de Batalha Naval. O sistema é composto por três componentes principais: o Servidor de Processamento, o Servidor Mestre (ou Servidor de Administração) e o Cliente. A comunicação entre esses componentes é realizada através de sockets e mensagens estruturadas.
+
+## Autores
+
+- **Marcos Rampaso** - Desenvolvedor 
+- **Pedro Costa** - Desenvolvedor
+
+## Professor Orientador
+
+- **Rodrigo Campiolo** - Professor Orientador
+  
+## Componentes do Sistema
+
+## Servidor_Hospedagem_Jogos
 Sistema distribuido para hospedagem de salas de jogos, cliente solicita para um servidor mestre o endereço de uma sala para ele jogar, este servidor o envia o endereço
 e então ele se conecta neste endereço para jogar batalha naval(Jogo implementado para o Projeto), o sistema funciona utilizando os seguintes processos principais.
 
