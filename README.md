@@ -55,28 +55,32 @@ A comunicação entre o cliente e a sala terão o seguinte cabeçalho
 
 Esta troca de mensagem se repete nestá ordem até que o jogo acabe. Sala manda uma solicitação para o cliente, o cliente responde a solicitação com suas escolhas.
 
-### Cliente & Servidor de Admistração
+# COmunicação Entre o Cliente e o Servidor de Administração
 
-# Cliente -> Servidor de Admistração
+## Cabeçalho de Comunicação Entre o Cliente e o Servidor de Administração
+ | Campo                | Tipo                | Descrição                                                                                  |
+|----------------------|---------------------|--------------------------------------------------------------------------------------------|
+| op                   | int (4 bytes)       | Tipo de operação: <br> - 1 -> Solicitação de sala                                         |
+| jogo selecionado     | int (4 bytes)       | Número do jogo selecionado (atualmente, somente o jogo 1, Batalha Naval, está implementado) |
+| size                 | int (4 bytes)       | Tamanho do nome do cliente em UTF-8                                                         |
+| nome                 | string (UTF-8 size) | Nome do cliente em UTF-8                                                                    |
 
- ====================================================== #
- | op (int 4 bytes)| jogo selecionado (int 4 bytes)  |  #       op = 1 solicitação de sala, jogo selecionado(no momento somente jogo 1 implementado, batalha naval)
- | size (int 4 bytes) | nome (string utf-8 size bytes)| #       tamanho do nome do cliente e o nome do cliente em utf-8
- ====================================================== #
-Quando o cliente inicia ele adquire jogo alvo e nome do cliente, 
-Envia uma solicitação para o servidor de administração solicitando uma sala para iniciar um jogo
+**Observação:** Quando o cliente inicia, ele recebe o jogo alvo e o nome do cliente, e então envia uma solicitação para o servidor de administração solicitando uma sala para iniciar o jogo.
 
 
-# Servidor de administração -> Cliente
 
- ============================================================ #
- | op (int 4 bytes)| port (int 4 bytes)| error (int 4 bytes)| #     op = 0 se algum erro ocorreu e = 1 se um sala foi encontrada, error indica o codigo do erro
- | size (int 4 bytes) |        ip (string size bytes)       | #     size é utilizado para receber ip, se op = 1 então ip e port indicam o endereço da sala adquirida
- ============================================================ #     se op = 0 ip é a mensagem de erro recebida
- Se o servidor de Admistração encontrar uma sala com estado == 1 então essa é a sala selecionada para o jogo, se não encontrar salas comum jogador esperando
- busca salas que estão com estado == 0, ao selecionar uma sala ele envia para o cliente o endereço da respectiva sala e altera o estado da sala para indicar que mais 
- um jogador se conectou nela, se nenhuma sala foi encontrada ou o tipo de jogo solicitado pelo cliente não está disponivel evia uma mensagem de erro para o cliente, se não envia o endereço para o cliente.
- As operações de leitura e escrita no objeto sala e na lista salas são protegidas com uma região critica usando semaforo
+# Cabeçalho de comunicação entre o Servidor e o Cliente
+
+| Campo                | Tipo                | Descrição                                                                                              |
+|----------------------|---------------------|--------------------------------------------------------------------------------------------------------|
+| op                   | int (4 bytes)       | Tipo de operação: <br> - 0 -> Se algum erro ocorreu <br> - 1 -> Sala encontrada                      |
+| port                 | int (4 bytes)       | Porta da sala, se `op = 1`. Indica a porta onde a sala está aguardando conexões de clientes.           |
+| error                | int (4 bytes)       | Código do erro, se `op = 0`. Se não houve erro, esse campo não é utilizado.                            |
+| size                 | int (4 bytes)       | Tamanho do IP em bytes, usado para o endereço da sala se `op = 1`.                                      |
+| ip                   | string (size bytes) | Endereço IP da sala, se `op = 1`. Se `op = 0`, o IP contém a mensagem de erro recebida.                |
+
+**Observação:** O Servidor de Administração busca uma sala com estado `== 1` (livre para novos jogadores). Se não encontrar, procura por salas com estado `== 0` (em espera). Após selecionar uma sala, envia o endereço ao cliente e altera o estado da sala. Se não encontrar uma sala adequada ou se o tipo de jogo solicitado não estiver disponível, envia uma mensagem de erro para o cliente. As operações de leitura e escrita no objeto sala e na lista de salas são protegidas com uma região crítica usando semáforo.
+
 
 
 
