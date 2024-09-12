@@ -37,6 +37,9 @@ O servidor de processamento lida com a criação e a gestão das salas de jogos.
 
 O cliente se conecta ao servidor de administração para solicitar uma sala e iniciar o jogo. Após receber o endereço da sala, o cliente se conecta ao servidor de processamento correspondente e participa do jogo de batalha naval.
 
+## Como executar a aplicação:
+
+
 ## Funcionamento dos componentes e comunicação
 
 ### Servidor de Hospedagem de Jogos
@@ -145,48 +148,48 @@ Quando o cliente inicia, ele recebe o jogo alvo e o nome do cliente, e então en
 **Observação:**  
 O Servidor de Administração busca uma sala com estado `== 1` (livre para novos jogadores). Se não encontrar, procura por salas com estado `== 0` (em espera). Após selecionar uma sala, envia o endereço ao cliente e altera o estado da sala. Se não encontrar uma sala adequada ou se o tipo de jogo solicitado não estiver disponível, envia uma mensagem de erro para o cliente. As operações de leitura e escrita no objeto sala e na lista de salas são protegidas com uma região crítica usando semáforo.
 
+# Funcionamento do Jogo
 
+## Abertura da Sala
 
+1. O Servidor Mestre já está ligado e espera conexões de salas.
+2. O Servidor de Processamento inicia e cria as salas.
+3. As salas se conectam ao Servidor Mestre, criam um socket para esperar conexões de clientes e indicam o endereço desse socket para o Servidor Mestre.
+4. O Servidor de Administração recebe o endereço de cada sala e os salva em objetos sala na lista de salas. Ambos os processos são protegidos por semáforo.
 
+## Início do Cliente
 
-### Funcionamento do jogo
+1. O cliente inicia e faz um pedido de sala para o Servidor de Administração.
+2. O Servidor de Administração envia ao cliente a sala disponível para se conectar e atualiza o valor do objeto sala.
+3. O cliente utiliza o endereço adquirido para se conectar à sala e iniciar o jogo.
+4. Após dois jogadores se conectarem a uma sala, o jogo será iniciado.
 
-# Abertura da sala
+## Início do Jogo
 
-- Servidor Mestre ja ligado espera conexão de salas
-- Servidor de processamento inicia e cria as salas
-- Salas se conectam ao Mestre, criam um socket para esperar conexões de clientes, indica o endereço deste socket para o servidor Mestre
-- Servidor de Administração recebe o endereço de cada sala e os salva em objetos sala na lista salas, ambos protegidos por semaforo
+1. A sala envia uma solicitação de seleção de tipo de jogo para o Jogador 1.
+2. O Jogador 1 decide qual tipo de jogo (isto interfere na quantidade de cada navio).
+3. A sala envia uma solicitação de posicionamento de navio para o Jogador 1.  
+   **Repetir até que todos os navios do Jogador 1 estejam posicionados.**
+4. O Jogador 1 insere o navio.
+5. A sala envia uma solicitação de posicionamento de navio para o Jogador 2.  
+   **Repetir até que todos os navios do Jogador 2 estejam posicionados.**
+6. O Jogador 2 insere o navio.
 
-# Cliente inicia
+## Meio do Jogo
 
-- Cliente incia e faz um pedido de sala para o Servidor de Administração
-- Servidor envia para um cliente a sala disponivel para ele se conectar, e atualiza o valor do objeto sala
-- Cliente utiliza o endereço adquirido para se conectar a sala para iniciar o jogo
-- Após dois jogadores se conectarem em uma sala o jogo será iniciado
+1. A sala envia uma solicitação de disparo para o Jogador 1.
+2. O Jogador 1 realiza o disparo.
+3. A sala verifica se o Jogador 2 foi derrotado. Se sim, então finaliza o jogo.
+4. A sala envia uma solicitação de disparo para o Jogador 2.
+5. O Jogador 2 realiza o disparo.
+6. A sala verifica se o Jogador 1 foi derrotado. Se sim, então finaliza o jogo.
 
-# Inicio do jogo 
+   Este fluxo se repete até que o jogo acabe por vitória ou por motivos de erro.
 
-- Sala envia uma solicitação de seleção de tipo de jogo para o JogadorUm
-- JogadorUm decide qual tipo do jogo(Interfere em quantidade de cada navio)         
-- Sala envia uma solicitação de posicionamento de navio para o jogador 1        #  Se repete até todos os navios   #
-- JogadorUm insere o navio                                                          # do jogadorUm serem posicionados  #
-- Sala envia uma solicitação de posicionamento de navio para o jogador 2        #  Se repete até todos os navios     #
-- JogadorUm insere o navio                                                          # do jogadorDois serem posicionados  #
+## Finalização do Jogo
 
-# Meio do jogo
+1. A sala envia para cada jogador o resultado do jogo.
+2. A sala encerra o jogo.
+3. Os clientes encerram a conexão com a sala.
+4. A sala avisa ao Servidor de Administração que o jogo foi finalizado e que a sala está livre.
 
-- Sala envia uma solicitação de disparo para o JogadorUm
-- JogadorUm realiza disparo
-- Sala verifica se JogadorDois foi derrotado, se sim então finaliza o jogo.              
-- Sala envia uma solicitação de disparo para o JogadorDois
-- JogadorDois realiza disparo
-- Sala verifica se JogadorUm foi derrotado, se sim então finaliza o jogo.              
-Este fluxo se repete até o jogo acabar por vitória ou motivos de erro
-
-# Finalização do jogo
-
-- Sala envia para cada jogador o resultado do jogo
-- Sala encerra jogo
-- Clientes encerram a conexão com a sala
-- Sala avisa para o Servidor de Administração que o jogo foi finaizado e que a sala está livre
