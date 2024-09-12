@@ -10,7 +10,7 @@ Este projeto é um sistema distribuído para a hospedagem de salas de jogos, esp
 ## Professor Orientador
 
 - **Rodrigo Campiolo** - Professor Orientador
-- 
+  
 ## Pré-requisitos
 
 Antes de executar a aplicação, certifique-se de ter os seguintes pré-requisitos instalados:
@@ -26,20 +26,17 @@ A arquitetura do projeto foi definida com base na "ILustração da arquitetura",
 
 Com base na ilustração, depreende-se que a arquitetura é cocmposta por três principais componentes interconectados:
 
-1. Servidor Mestre (ou Servidor de Administração):
-
-- Gerencia as solicitações dos clientes e coordena a criação e o estado das salas de jogos.
-- Mantém uma lista de salas disponíveis e envia o endereço da sala para os clientes.
+1. **Servidor Mestre** (ou Servidor de Administração):
+  - Gerencia as solicitações dos clientes e coordena a criação e o estado das salas de jogos.
+  - Mantém uma lista de salas disponíveis e envia o endereço da sala para os clientes.
   
-2. Servidor de Processamento:
-
-- Cria e gerencia salas de jogos e aguarda conexões dos clientes.
-- Inicia o jogo quando dois clientes se conectam e gerencia a comunicação entre eles durante o jogo.
+2. **Servidor de Processamento:**
+  - Cria e gerencia salas de jogos e aguarda conexões dos clientes.
+  - Inicia o jogo quando dois clientes se conectam e gerencia a comunicação entre eles durante o jogo.
   
-3. Cliente:
-
-- Solicita uma sala ao Servidor Mestre e, após receber o endereço, conecta-se ao Servidor de Processamento para jogar.
-- Participa do jogo de Batalha Naval interagindo com o servidor de processamento.
+3. **Cliente:**
+  - Solicita uma sala ao Servidor Mestre e, após receber o endereço, conecta-se ao Servidor de Processamento para jogar.
+  - Participa do jogo de Batalha Naval interagindo com o servidor de processamento.
 
 ## Componentes do Sistema e Tecnologias
 
