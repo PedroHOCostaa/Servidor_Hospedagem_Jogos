@@ -14,6 +14,7 @@ O servidor mestre possui dois sockets que espeream conexões, um que espera cone
 ### Fluxos de comunicação:
 
 # Salas -> Servidor Mestre
+
  ============================================================ 
  | op (int 4 bytes)| port (int 4 bytes)| error (int 4 bytes)|            op = 1 -> Criação de sala                           
  | size (int 4 bytes) |    ip (string utf-8 size bytes)     |               = 2 -> Atualização de sala após finalizar jogo   
@@ -26,7 +27,9 @@ ip = Ip da sala que está esperando conexões de clientes
 Salas do Servidor de Processamento se conectam com o socket do servidor de Adminitração que espera conexçoes de sala. A sala então envia para o servidor Mestre o endereço do socket que está esperando conexões de clientes, após o jogo acabar a sala envia para o servidor de Administração as seguintes informações: op, resultado, erro, size e nome, onde resultado é utilizado para determinar se o jogo terminou por uma vitória ou algum erro, nome indica o nome do jogador que venceu a partida, em caso de erro(resultado != 1) erro indica o codigo do erro recebido.
 
 ### Sala & Cliente
+
 # Sala -> Cliente
+
  ========================================= 
  |op (int 4 bytes)| mensagem(int 4 bytes)|          op = indica o tipo de operação solicitada pela sala: op = 1 -> solicitação de posicionamento de navio, mensagem o 
  |    mapa jogador (100 int 4 bytes)     |          tipo do navio que será inserido, op = 2 -> solicitação de disparo para o jogador, op = 3 -> indica que o jogo acabou
@@ -35,19 +38,20 @@ Salas do Servidor de Processamento se conectam com o socket do servidor de Admin
 mapa da do jogador utilizado quando op = 1 | 2 | 3, mapa do adversário utilizado quando op = 2 | 3
 
 Após o jogador receber uma solicitação diferente de op = 3(jogo finalizado), o jogador salva os dados solicitados no cabeçalho e seu nome em nome em modo utf-8
-# Cliente -> Sala
- ================================================ 
- | op (int 4 bytes)|    coluna (int 4 bytes)    |   op: igual ao op da solicitação enviada para o cliente, coluna indica qual o valor no eixo y que o tiro ou o navio
- | linha (int 4 bytes)| orientacao (int 4 bytes)|   será posicionado, linha indica qual o valor no eixo x que o tiro ou o navio será posicionado, orientacao é utilizado
- | size (int 4 bytes) |   nome (string size)    |   quando op = 1 como a orientação do navio, quando op = 3 ele indica qual jogo foi selecionado. 
- ================================================ 
-size = tamanho do nome do cliente em utf-8
-nome = string do nome em utf-8
+
+### Cliente -> Sala
+
+| op (int 4 bytes) | coluna (int 4 bytes) | linha (int 4 bytes) | orientação (int 4 bytes) | size (int 4 bytes) | nome (string size) |
+|------------------|----------------------|---------------------|---------------------------|--------------------|---------------------|
+| op: Igual ao op da solicitação enviada para o cliente. | coluna: Valor no eixo y onde o tiro ou o navio será posicionado. | linha: Valor no eixo x onde o tiro ou o navio será posicionado. | orientação: Utilizada quando op = 1 (orientação do navio) ou op = 3 (tipo de jogo). | size: Tamanho do nome em UTF-8. | nome: Nome do cliente em UTF-8. |
+
 
 Esta troca de mensagem se repete nestá ordem até que o jogo acabe. Sala manda uma solicitação para o cliente, o cliente responde a solicitação com suas escolhas.
 
 ### Cliente & Servidor de Admistração
+
 # Cliente -> Servidor de Admistração
+
  ====================================================== #
  | op (int 4 bytes)| jogo selecionado (int 4 bytes)  |  #       op = 1 solicitação de sala, jogo selecionado(no momento somente jogo 1 implementado, batalha naval)
  | size (int 4 bytes) | nome (string utf-8 size bytes)| #       tamanho do nome do cliente e o nome do cliente em utf-8
@@ -57,6 +61,7 @@ Envia uma solicitação para o servidor de administração solicitando uma sala 
 
 
 # Servidor de administração -> Cliente
+
  ============================================================ #
  | op (int 4 bytes)| port (int 4 bytes)| error (int 4 bytes)| #     op = 0 se algum erro ocorreu e = 1 se um sala foi encontrada, error indica o codigo do erro
  | size (int 4 bytes) |        ip (string size bytes)       | #     size é utilizado para receber ip, se op = 1 então ip e port indicam o endereço da sala adquirida
@@ -70,19 +75,23 @@ Envia uma solicitação para o servidor de administração solicitando uma sala 
 
 
 ### Funcionamento do jogo
+
 # Abertura da sala
+
 - Servidor Mestre ja ligado espera conexão de salas
 - Servidor de processamento inicia e cria as salas
 - Salas se conectam ao Mestre, criam um socket para esperar conexões de clientes, indica o endereço deste socket para o servidor Mestre
 - Servidor de Administração recebe o endereço de cada sala e os salva em objetos sala na lista salas, ambos protegidos por semaforo
 
 # Cliente inicia
+
 - Cliente incia e faz um pedido de sala para o Servidor de Administração
 - Servidor envia para um cliente a sala disponivel para ele se conectar, e atualiza o valor do objeto sala
 - Cliente utiliza o endereço adquirido para se conectar a sala para iniciar o jogo
 - Após dois jogadores se conectarem em uma sala o jogo será iniciado
 
 # Inicio do jogo 
+
 - Sala envia uma solicitação de seleção de tipo de jogo para o JogadorUm
 - JogadorUm decide qual tipo do jogo(Interfere em quantidade de cada navio)         
 - Sala envia uma solicitação de posicionamento de navio para o jogador 1        #  Se repete até todos os navios   #
@@ -91,6 +100,7 @@ Envia uma solicitação para o servidor de administração solicitando uma sala 
 - JogadorUm insere o navio                                                          # do jogadorDois serem posicionados  #
 
 # Meio do jogo
+
 - Sala envia uma solicitação de disparo para o JogadorUm
 - JogadorUm realiza disparo
 - Sala verifica se JogadorDois foi derrotado, se sim então finaliza o jogo.              
@@ -100,6 +110,7 @@ Envia uma solicitação para o servidor de administração solicitando uma sala 
 Este fluxo se repete até o jogo acabar por vitória ou motivos de erro
 
 # Finalização do jogo
+
 - Sala envia para cada jogador o resultado do jogo
 - Sala encerra jogo
 - Clientes encerram a conexão com a sala
