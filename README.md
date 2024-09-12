@@ -11,9 +11,15 @@ Este projeto é um sistema distribuído para a hospedagem de salas de jogos, esp
 
 - **Rodrigo Campiolo** - Professor Orientador
   
-## Componentes do Sistema
+## Componentes do Sistema e Tecnologias
 
-## Servidor_Hospedagem_Jogos
+O sistema é composto por diversos componentes desenvolvidos utilizando diferentes tecnologias. As principais tecnologias usadas são:
+
+- **Python**: Utilizado para o desenvolvimento do cliente e do servidor de administração.
+- **Linguagem C**: Utilizada para o desenvolvimento do servidor de processamento.
+
+
+## Servidor Hospedagem Jogos
 Sistema distribuido para hospedagem de salas de jogos, cliente solicita para um servidor mestre o endereço de uma sala para ele jogar, este servidor o envia o endereço
 e então ele se conecta neste endereço para jogar batalha naval(Jogo implementado para o Projeto), o sistema funciona utilizando os seguintes processos principais.
 
