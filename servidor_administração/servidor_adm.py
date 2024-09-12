@@ -102,6 +102,8 @@ def procura_sala_vaga():        # Toda essa função ocorre dentro de uma regiã
 
 
 
+
+
 ### Cliente -> Servidor de administração
 
 # ====================================================== #
@@ -121,37 +123,56 @@ def procura_sala_vaga():        # Toda essa função ocorre dentro de uma regiã
 # | size (int 4 bytes) |        ip (string size bytes)       | #
 # ============================================================ #
 
-
-
 def thread_handle_cliente(conn, addr):  
     
+    ### Recebe a mensagem do cliente
+        # ====================================================== #
+        # | op (int 4 bytes)| jogo selecionado (int 4 bytes)  |  #
+        # | size (int 4 bytes) | nome (string utf-8 size bytes)| #
+        # ====================================================== #
+
     op, jogo_selecionado, size = struct.unpack('!III', conn.recv(12)) ### Recebe do cliente a operação, qual jogo ele quer jogar e size de nome
     nome = conn.recv(size).decode()                                   ### Recebe o nome do jogador
 
 
     if(jogo_selecionado == 1):  ### Indica que o jogo selecionado é batalho naval
-        semaforo1.acquire()             # ================região critica================== # Inicio
-        sala = procura_sala_vaga()      
-        if sala is None:
-            semaforo1.release()         # ================região critica================== # Final se não encontrar sala
-            mensagem =  "Não há salas disponíveis no momento".encode()
-            conn.send(struct.pack('!IIII', 0, 0, 44, len(mensagem))) ### Envia 0 para indicar que algum erro ocorreu, e codigo 44
-            conn.send(mensagem)                                      ### Envia a mensagem de erro para o cliente
-            conn.close()
-            return
-        sala.estado = sala.estado + 1
-        semaforo1.release()             # ================região critica================== # Final se encontrar sala
-        conn.send(struct.pack('!IIII', 1, sala.port, 0, len(sala.ip))) ### Envia 1 para indicar que há sala disponível, a porta da sala, erro = 0
-        conn.send(sala.ip.encode())                                    ### E ip da sala para o cliente
-        print("Jogador ", nome, " entrou na sala de ip: ", sala.ip, "e porta: ", sala.port, "\n")        
-        ### Ponto 3 sala
-    
-    
-    else:
-        mensagem =  "Jogo não disponível".encode()
-        conn.send(struct.pack('!IIII', 0, 0, 45, len(mensagem)))    ### Envia 0 para indicar que algum erro ocorreu, e codigo 45
-        conn.send(mensagem)                                         ### Envia a mensagem de erro para o cliente
 
+        ### Entra na região critica para procurar uma sala vaga para o cliente
+        semaforo1.acquire()             # ================região critica================== # Inicio
+        
+        ### Primeiramente procura salas com um jogador esperando, depois procura salas vazias
+        sala = procura_sala_vaga()
+
+        if sala is None:            ### Se não encontrar nenhuma sala disponível
+            semaforo1.release()         # ================região critica================== # Final se não encontrar sala
+
+            mensagem =  "Não há salas disponíveis no momento".encode()  ### Salva a mensagem de erro em mensagem
+                                                                        ### 0 para indicar que algum erro ocorreu, e codigo 44 = Não há salas disponíveis
+            cabecalho = struct.pack('!IIII', 0, 0, 44, len(mensagem))   ### Salva os dados em cabecalho
+
+        else:                       ### Se encontrar uma sala disponível
+            sala.estado = sala.estado + 1   ### Aumenta o estado da sala em 1, mostrando que um jogador está ocupando uma vaga
+            semaforo1.release()             # ================região critica================== # Final se encontrar sala
+
+            mensagem = sala.ip.encode()                                         ### Salva o ip da sala em mensagem
+            cabecalho = struct.pack('!IIII', 1, sala.port, 0, len(sala.ip))     ### Envia 1 para indicar que há sala disponível, a porta da sala, erro = 0
+            print("Jogador ", nome, " irá se conectar na sala de ip: ", sala.ip, "e porta: ", sala.port, "\n")      ### Pode ser substituido por um log  
+            ### Ponto 3 sala
+    
+    
+    else:       ### Jogo selecionado não está disponível, então envia uma mensagem de erro para o cliente
+        mensagem =  "Jogo não disponível".encode()                  ### Salva a mensagem de erro em mensagem
+                                                                    ### 0 para indicar que algum erro ocorreu, e codigo 45 = Jogo selecionado não está disponível
+        cabecalho = struct.pack('!IIII', 0, 0, 45, len(mensagem))   ### Salva os dados no cabecalho
+
+
+    ### Envia a mensagem para o cliente
+        # ============================================================ #
+        # | op (int 4 bytes)| port (int 4 bytes)| error (int 4 bytes)| #
+        # | size (int 4 bytes) |        ip (string size bytes)       | #
+        # ============================================================ #
+    conn.send(cabecalho)        ### Envia o cabeçalho para o cliente, indicando o ip e a porta da sala solicitada
+    conn.send(mensagem)         ### Envia a mensagem para o cliente, que pode ser um ip ou uma mensagem de erro
     conn.close()
 
 def thread_clientes():
