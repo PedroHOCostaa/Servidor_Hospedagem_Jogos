@@ -10,7 +10,14 @@ Este projeto é um sistema distribuído para a hospedagem de salas de jogos, esp
 ## Professor Orientador
 
 - **Rodrigo Campiolo** - Professor Orientador
-  
+
+## Arquitetura do Projeto
+
+A arquitetura do projeto foi definida com base na Imagem 1.
+
+![Ilustração da arquitetura](arquitetura.png)
+
+
 ## Componentes do Sistema e Tecnologias
 
 O sistema é composto por diversos componentes desenvolvidos utilizando diferentes tecnologias. As principais tecnologias usadas são:
@@ -71,7 +78,7 @@ O sistema é composto pelos seguintes processos principais:
 - As operações de escrita no estado da sala e a busca e atualização do valor na busca da sala para o cliente são protegidas com uma região crítica usando um semáforo. Isso garante a consistência dos dados.
 
 
-# Fluxos de comunicação:
+# Cabeçalhos de comunicação:
 
 ## Salas -> Servidor Mestre
 
