@@ -2,7 +2,6 @@ import socket
 import struct
 
 endereco_servidor_adm = ('localhost', 5001)
-mapa_vazio = [0]*100
 
 ### Cliente -> Servidor de administração
 
@@ -56,33 +55,49 @@ def printa_mapa(mapa):
 
 
 def main():
-    print("inicio")
+        ### Conexão com o servidor de administração ###
     socket_servidor_adm = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     socket_servidor_adm.connect(endereco_servidor_adm)
     print("Conectado ao servidor de administração\n")
-    nome = input("Nome: ").encode()
+
+
+    # Escolhe o nome e o jogo que deseja jogar e envia para o servidor de administração um pedido de sala para este jogo
+        # ====================================================== #
+        # | op (int 4 bytes)| jogo selecionado (int 4 bytes)   | #
+        # | size (int 4 bytes) | nome (string utf-8 size bytes)| #
+        # ====================================================== #
+
+    nome = input("Escolha seu nome: ").encode()                                 
     jogo = int(input("Selecione o jogo que quer jogar\n\tDigite 1 para batalha naval: "))
     socket_servidor_adm.send(struct.pack('!III', 1, jogo, len(nome)))           ### Envia 1(pedido de jogo), o jogo selecionado e o tamanho do nome
     socket_servidor_adm.send(nome)                                              ### Envia o nome do jogador
-    op, port, error, size = struct.unpack('!IIII', socket_servidor_adm.recv(16))    ### Recebe a operação, a porta, o erro e o tamanho da mensgaem
+
+
+    # Recebe a resposta do servidor de administração
+        # ============================================================ #
+        # | op (int 4 bytes)| port (int 4 bytes)| error (int 4 bytes)| #
+        # | size (int 4 bytes) |        ip (string size bytes)       | #
+        # ============================================================ #
+
+    op, port, error, size = struct.unpack('!IIII', socket_servidor_adm.recv(16))    ### Recebe a operação, a porta, o erro e tamanho da mensgaem
     mensagem = socket_servidor_adm.recv(size).decode()                              ### Recebe a mensagem
-    if(op == 0):
-        print("Erro: ", error, " - ", mensagem) ### Conexão com a sala não foi possível
+
+    if(op == 0):                                ### Conexão com a sala não foi possível 
+        print("Erro: ", error, " - ", mensagem) 
+        socket_servidor_adm.close()             ### Fecha o socket de comunicação com o servidor de administração
+
+    else:                                       ### Ip e porta da sala adquiridos com sucesso 
         socket_servidor_adm.close()             ### Fecha o socket de comunicação com o servidor de administração
 
 
-    else:
-        ### Ip e porta da sala adquiridos com sucesso ###
-
-        socket_servidor_adm.close()             ### Fecha o socket de comunicação com o servidor de administração
+            # Conexão com o socket da sala, por meio do ip e porta adquiridos pelo servidor de adminitração
         print("Conectando a sala de ip: ", mensagem, " e porta: ", port)
-        socket_sala = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        socket_sala.connect((mensagem, port))   ### Conecta a sala de jogo
+        socket_sala = socket.socket(socket.AF_INET, socket.SOCK_STREAM)     ### Cria o socket da sala de jogo e o configura
+        socket_sala.connect((mensagem, port))                               ### Conecta a sala de jogo
         print("Conectado a sala de jogo")
         print("Aguarde o inicio do jogo")
 
-        conexão = True
-        while conexão:
+        while True:
 
                 # ========================================= #
                 # |op (int 4 bytes)| mensagem(int 4 bytes)| #           
@@ -116,7 +131,6 @@ def main():
                     print("O jogo acabou, por motivos de erro, erro numero: ", mensagem)
                 printa_mapa(mapa_jogador)
                 printa_mapa(mapa_adversario)
-                conexão = False
                 break
 
             elif(op == 4):              ### Jogador decide qual será o tipo do jogo ###
