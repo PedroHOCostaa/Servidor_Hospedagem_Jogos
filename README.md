@@ -17,7 +17,20 @@ O sistema é composto por diversos componentes desenvolvidos utilizando diferent
 
 - **Python**: Utilizado para o desenvolvimento do cliente e do servidor de administração.
 - **Linguagem C**: Utilizada para o desenvolvimento do servidor de processamento.
+- 
+### Servidor de Administração (Python)
 
+O servidor de administração gerencia as solicitações dos clientes e coordena a criação e o estado das salas de jogos. Ele se comunica com o servidor de processamento e com os clientes para fornecer informações sobre salas disponíveis e para iniciar e finalizar jogos.
+
+### Servidor de Processamento (C)
+
+O servidor de processamento lida com a criação e a gestão das salas de jogos. Ele aguarda conexões de clientes e gerencia o fluxo do jogo de batalha naval. Quando dois clientes se conectam a uma sala, o servidor de processamento inicia o jogo e gerencia a comunicação entre os jogadores.
+
+### Cliente (Python)
+
+O cliente se conecta ao servidor de administração para solicitar uma sala e iniciar o jogo. Após receber o endereço da sala, o cliente se conecta ao servidor de processamento correspondente e participa do jogo de batalha naval.
+
+## Funcionamento dos componentes e comunicação
 
 ## Servidor Hospedagem Jogos
 Sistema distribuido para hospedagem de salas de jogos, cliente solicita para um servidor mestre o endereço de uma sala para ele jogar, este servidor o envia o endereço
