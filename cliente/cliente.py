@@ -104,7 +104,16 @@ def main():
                 # |  mapa adversario (100 int 4 bytes)    | #           
                 # ========================================= #
             print("Esperando mensagem da sala")
-            op, mensagem, mapa_jogador, mapa_adversario = struct.unpack('!II100I100I', socket_sala.recv(808))
+            dados = socket_sala.recv(808)
+
+            # Recebe os dados do socket
+            valores = struct.unpack('!II100I100I', dados)
+
+            # Atribui os valores às variáveis apropriadas
+            op = valores[0]
+            mensagem = valores[1]
+            mapa_jogador = valores[2:102]
+            mapa_adversario = valores[102:202]
             print("Pacote recebido da sala, op: ", op, " mensagem: ", mensagem)
 
             if(op == 1):              ### Jogador escolhe aonde irá colocar o Navio ###
@@ -113,14 +122,14 @@ def main():
                 orientacao = int(input("Digite 0 para orientação original e 1 para invertida: "))
                 coluna = int(input("Digite a posição na coluna: "))
                 linha = int(input("Digite a posição na linha: "))
-                cabecalho = struct.pack('!IIII', 1, coluna, linha, orientacao, len(nome))
+                cabecalho = struct.pack('!IIIII', 1, coluna, linha, orientacao, len(nome))
 
             elif(op == 2):              ### Jogador realiza um disparo ###
                 printa_mapa(mapa_jogador)
                 printa_mapa(mapa_adversario)
                 coluna = int(input("Digite a posição na coluna para realizar um disparo: "))
                 linha = int(input("Digite a posição na linha para realizar um disparo: "))
-                cabecalho = struct.pack('!IIII', 2, coluna, linha, 0, len(nome))
+                cabecalho = struct.pack('!IIIII', 2, coluna, linha, 0, len(nome))
 
             elif(op == 3):              ### Jogo acabou ###
                 if mensagem == 1:
@@ -135,7 +144,7 @@ def main():
 
             elif(op == 4):              ### Jogador decide qual será o tipo do jogo ###
                 tipo_do_jogo = int(input("Escolha qual o tipo do jogo que deseja jogar\n\tDigite 1 para batalhar com: 1 navio de cada tipo\n\tDigite 2 para batalhar com 2 navios do tipo um e dois e 1 navio do tipo 3 e 4"))
-                cabecalho = struct.pack('!IIII', 4, 0, 0, tipo_do_jogo, len(nome))
+                cabecalho = struct.pack('!IIIII', 4, 0, 0, tipo_do_jogo, len(nome))
             
 
                 # ================================================ #        # ======================================================================== #

@@ -17,6 +17,68 @@
 
 int jogadoresNaSalas[SALAS];
 
+//# ================================================ #
+//# | op (int 4 bytes)|    coluna (int 4 bytes)    | #
+//# | linha (int 4 bytes)| orientacao (int 4 bytes)| #
+//# | size (int 4 bytes) |   nome (string size)    | #
+//# ================================================ #
+
+
+void receberDoCliente(int socket, int* op, int* coluna, int* linha, int* orientacao, char* nome) {
+    char buffer[20]; // Buffer para os primeiros 20 bytes
+    int bytes_recebidos = recv(socket, buffer, sizeof(buffer), 0);
+    if (bytes_recebidos < 0) {
+        perror("Erro ao receber dados do cliente");
+        return;
+    }
+
+    // Converte os dados do buffer para as variáveis
+    int offset = 0;
+    int temp;
+    
+    memcpy(&temp, buffer + offset, sizeof(int));
+    *op = ntohl(temp);
+    offset += sizeof(int);
+    
+    memcpy(&temp, buffer + offset, sizeof(int));
+    *coluna = ntohl(temp);
+    offset += sizeof(int);
+    
+    memcpy(&temp, buffer + offset, sizeof(int));
+    *linha = ntohl(temp);
+    offset += sizeof(int);
+    
+    memcpy(&temp, buffer + offset, sizeof(int));
+    *orientacao = ntohl(temp);
+    offset += sizeof(int);
+    
+    memcpy(&temp, buffer + offset, sizeof(int));
+    int size = ntohl(temp);
+
+    // Recebe os bytes restantes iguais a size
+    char* nome_buffer = (char*)malloc(size + 1); // +1 para o caractere nulo
+    if (nome_buffer == NULL) {
+        perror("Erro ao alocar memória para o nome");
+        return;
+    }
+
+    bytes_recebidos = recv(socket, nome_buffer, size, 0);
+    if (bytes_recebidos < 0) {
+        perror("Erro ao receber o nome do cliente");
+        free(nome_buffer);
+        return;
+    }
+
+    // Adiciona o caractere nulo ao final da string
+    nome_buffer[size] = '\0';
+
+    // Copia o nome para a variável nome
+    strcpy(nome, nome_buffer);
+
+    // Libera a memória alocada para o nome_buffer
+    free(nome_buffer);
+}
+
 void carregarMapa(struct mapa* mapaJogador, struct mapa* mapaAdversario, int * mapa_jogador, int * mapa_adversario)
 {
     for(int i = 0; i < 10; i++)
@@ -72,18 +134,23 @@ void jogo(int jogador1, int jogador2)
     int op = 4; // Indica operação de escolha do tipo de jogo
     int mensagem = 0; // Exemplo de mensagem inicial
     int orientacao;
-    
+    int decisao;
+    int coluna;
+    int linha;
+    char nomeJogador1[256];
+    char nomeJogador2[256];
 
     
     // Exemplo de uso da função
     int mapa_jogador[100] = {0};  // Inicializa com 100 posições vazias
     int mapa_adversario[100] = {0}; // Inicializa com 100 posições vazias
     
-    enviarParaCliente(jogador1, op, mensagem, mapa_jogador, mapa_adversario);
+    enviarParaCliente(jogador1, op, mensagem, mapaVazio, mapaVazio);
     
-    scanf("%d", &tipoJogo);
-    printf("Jogador 1 escolheu o tipo de jogo: %d\n", ntohl(tipoJogo));
-
+    receberDoCliente(socket, &op, &coluna, &linha, &decisao, nomeJogador1);
+    
+    printf("Jogador 1 escolheu o tipo de jogo: %d\n", decisao);
+    tipoJogo = decisao;
     int qtdNavios[4], qtdNaviosJ1[4], qtdNaviosJ2[4], qtdTiros;
     if(tipoJogo == 1)
     {
@@ -113,14 +180,15 @@ void jogo(int jogador1, int jogador2)
         printf("Navio do tipo %d\n", i);
         while(qtdNaviosJ1[i] > 0)
         {
-                /// Jogador seleciona posição do navio, está secção será substituida por uma operação de socket para receber estes dados
-                printf("%d navios do tipo %d a serem posicionados\n", qtdNaviosJ1[i], i);
-                printf("Digite a orientação do navio: ");
-                scanf("%d", &orientacao);
-                printf("Digite a ancora da coluna do navio: ");
-                scanf("%d", &ancoraColuna);
-                printf("Digite a ancora da linha do navio: ");
-                scanf("%d", &ancoraLinha);
+                // Envia solicitação para o cliente posicionar o navio
+                op = 1; // Indica operação de posicionar navio
+                mensagem = i; // Exemplo de mensagem inicial
+                carregarMapa(mapaJogadorUm, mapaJogadorDois, mapa_jogador, mapa_adversario); // Carrega os mapas
+                enviarParaCliente(jogador1, op, mensagem, mapaVazio, mapaVazio);
+                
+                receberDoCliente(socket, &op, &coluna, &linha, &orientacao, nomeJogador1);
+                /// Jogador seleciona posição do navio, está secção será substituida por uma operação de socket para receber estes dados            
+
             if(criado == 0)
             {
                 novoNavio = (struct navio*)malloc(sizeof(struct navio));
@@ -318,9 +386,8 @@ void* sala(void* arg)
         printf("Aguardando conexões de clientes na porta %d\n", ntohl(data->port));
 
         // Aceita uma conexão do servidor de comunicação
-        int *client_socket = malloc(sizeof(int));
-        *(client_socket) = accept(communication_socket, NULL, NULL);
-        if (*(client_socket) < 0) {
+        int client_socket = accept(communication_socket, NULL, NULL);
+        if (client_socket < 0) {
             perror("Erro ao aceitar conexão do servidor de comunicação");
             close(communication_socket);
             close(data->admin_socket);
@@ -328,9 +395,8 @@ void* sala(void* arg)
         }
         printf("Conexão estabelecida com o jogador 1.\n");
 
-        int *client_socket2 = malloc(sizeof(int));
-        *(client_socket2) = accept(communication_socket, NULL, NULL);
-        if (*(client_socket2) < 0) {
+        int client_socket2 = accept(communication_socket, NULL, NULL);
+        if (client_socket2 < 0) {
             perror("Erro ao aceitar conexão do servidor de comunicação");
             close(communication_socket);
             close(data->admin_socket);
@@ -396,27 +462,43 @@ void enviarParaCliente(int socket, int op, int mensagem, int mapa_jogador[100], 
     // Preenche a estrutura com os dados
     dados.op = htonl(op);  // Converte para a ordem de bytes da rede
     dados.mensagem = htonl(mensagem);
-    ssize_t tamanho_mensagem_enviada = 0;
-    send(socket, dados.op, sizeof(dados.op), 0);
-    tamanho_mensagem_enviada = tamanho_mensagem_enviada + sizeof(dados.op);
-    send(socket, dados.mensagem, sizeof(dados.mensagem), 0);
-    tamanho_mensagem_enviada = tamanho_mensagem_enviada + sizeof(dados.mensagem);
-    
+
     // Converte os mapas para a ordem de bytes da rede
     for (int i = 0; i < 100; ++i) {
-        send(socket, htonl(mapa_jogador[i]), sizeof(dados.mapa_jogador[i]), 0);
-        tamanho_mensagem_enviada = tamanho_mensagem_enviada + sizeof(dados.mapa_jogador[i]);
+        dados.mapa_jogador[i] = htonl(mapa_jogador[i]);
+        dados.mapa_adversario[i] = htonl(mapa_adversario[i]);
     }
-    
-    for (int i = 0; i < 100; ++i) {
-        send(socket, htonl(mapa_adversario[i]), sizeof(dados.mapa_adversario[i]), 0);
-        tamanho_mensagem_enviada = tamanho_mensagem_enviada + sizeof(dados.mapa_adversario[i]);
-    }
-    
-    // Envia a estrutura para o cliente
 
-    
-    printf("Dados enviados para o cliente. Bytes enviados: %zd\n", tamanho_mensagem_enviada);
+    // Calcula o tamanho total do buffer
+    size_t tamanho_buffer = sizeof(dados.op) + sizeof(dados.mensagem) + sizeof(dados.mapa_jogador) + sizeof(dados.mapa_adversario);
+
+    // Aloca memória para o buffer
+    char *buffer = (char *)malloc(tamanho_buffer);
+    if (buffer == NULL) {
+        perror("Erro ao alocar memória para o buffer");
+        return;
+    }
+
+    // Copia os dados para o buffer
+    size_t offset = 0;
+    memcpy(buffer + offset, &dados.op, sizeof(dados.op));
+    offset += sizeof(dados.op);
+    memcpy(buffer + offset, &dados.mensagem, sizeof(dados.mensagem));
+    offset += sizeof(dados.mensagem);
+    memcpy(buffer + offset, dados.mapa_jogador, sizeof(dados.mapa_jogador));
+    offset += sizeof(dados.mapa_jogador);
+    memcpy(buffer + offset, dados.mapa_adversario, sizeof(dados.mapa_adversario));
+
+    // Envia o buffer de uma só vez
+    ssize_t bytes_enviados = send(socket, buffer, tamanho_buffer, 0);
+    if (bytes_enviados < 0) {
+        perror("Erro ao enviar os dados para o cliente");
+    } else {
+        printf("Dados enviados para o cliente. Bytes enviados: %zd\n", bytes_enviados);
+    }
+
+    // Libera a memória alocada para o buffer
+    free(buffer);
 }
 
 int main()
