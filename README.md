@@ -13,7 +13,7 @@ Este projeto é um sistema distribuído para a hospedagem de salas de jogos, esp
 
 ## Arquitetura do Projeto
 
-A arquitetura do projeto foi definida com base na Imagem 1.
+A arquitetura do projeto foi definida com base na "ILustração da arquitetura", disponível neste repositório.
 
 ![Ilustração da arquitetura](Arquitetura_e_fluxo_da_comunicação_SD.drawio.png)
 
@@ -36,9 +36,43 @@ O servidor de processamento lida com a criação e a gestão das salas de jogos.
 ### Cliente (Python)
 
 O cliente se conecta ao servidor de administração para solicitar uma sala e iniciar o jogo. Após receber o endereço da sala, o cliente se conecta ao servidor de processamento correspondente e participa do jogo de batalha naval.
+## Como Executar a Aplicação
 
-## Como executar a aplicação:
+Para executar a aplicação, você precisará ter um compilador de linguagem C instalado em sua máquina, como o GCC, e também o Python. Siga os passos abaixo:
 
+1. **Clone o Repositório**
+   - Execute o comando:
+     ```bash
+     git clone https://github.com/PedroHOCostaa/Servidor_Hospedagem_Jogos/
+     ```
+
+2. **Compile o Servidor em C**
+   - Vá para o diretório clonado e acesse a pasta `servidor_em_c`:
+     ```bash
+     cd Servidor_Hospedagem_Jogos/servidor_em_c
+     ```
+   - Execute o comando `make` para compilar o servidor:
+     ```bash
+     make
+     ```
+
+3. **Execute o Servidor de Administração**
+   - Execute o servidor de administração com o comando:
+     ```bash
+     python servidor_adm.py
+     ```
+
+4. **Execute o Servidor em C**
+   - Execute o servidor em C com o comando:
+     ```bash
+     ./servidor_processamento
+     ```
+
+5. **Selecione a Porta do Servidor de Processamento**
+   - Quando solicitado, selecione uma porta para o servidor de processamento (recomenda-se utilizar a porta 5002).
+
+6. **Inicie o Jogo**
+   - Agora, siga as instruções enviadas ao cliente e bom jogo!
 
 ## Funcionamento dos componentes e comunicação
 
