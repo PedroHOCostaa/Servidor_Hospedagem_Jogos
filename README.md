@@ -15,7 +15,7 @@ Este projeto é um sistema distribuído para a hospedagem de salas de jogos, esp
 
 A arquitetura do projeto foi definida com base na Imagem 1.
 
-![Ilustração da arquitetura](arquitetura.png)
+![Ilustração da arquitetura](Arquitetura_e_fluxo_da_comunicação_SD.png)
 
 
 ## Componentes do Sistema e Tecnologias
@@ -24,7 +24,7 @@ O sistema é composto por diversos componentes desenvolvidos utilizando diferent
 
 - **Python**: Utilizado para o desenvolvimento do cliente e do servidor de administração.
 - **Linguagem C**: Utilizada para o desenvolvimento do servidor de processamento.
-- 
+  
 ### Servidor de Administração (Python)
 
 O servidor de administração gerencia as solicitações dos clientes e coordena a criação e o estado das salas de jogos. Ele se comunica com o servidor de processamento e com os clientes para fornecer informações sobre salas disponíveis e para iniciar e finalizar jogos.
