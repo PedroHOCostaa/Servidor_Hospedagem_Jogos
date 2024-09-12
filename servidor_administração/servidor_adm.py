@@ -67,7 +67,7 @@ def thread_handle_sala(conn, addr):     ### Thread é iniciada quando uma sala s
     op, port, error, size = struct.unpack('!IIII', conn.recv(16))   ### Recebe e desempacota a mensagem da sala
                                                                     ### Indicando a porta que está esperando conexões de clientes
     ip = conn.recv(size).decode()                                   ### Recebe o ip do socket que aguarda conexões de clientes
-    print("Sala de ip: ", ip, " e porta: ", port, " conectada\n, operação: ", op, "\n")
+    print("Sala de ip: ", ip, " e porta: ", port, " conectada, operação: ", op, "\n")
 
     
     sala_atual = Sala(ip, port, port)   # Cria o objeto sala da sala que acabou de se conectar                                     
@@ -99,6 +99,11 @@ def thread_handle_sala(conn, addr):     ### Thread é iniciada quando uma sala s
 def thread_salas():                     ### Thread que espera conexões de salas do servidor de processamento
     ### Cria o socket que espera as salas do servidor de processamento se conectarem
     socket_salas = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    ### Configura o socket para reutilizar o endereço e a porta
+    socket_salas.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+    ### Faz o bind do socket com o endereço e a porta
     socket_salas.bind(('127.0.0.1', 5000))
     socket_salas.listen()
     
@@ -192,6 +197,9 @@ def thread_handle_cliente(conn, addr):      ### Está thread então envia para o
 
 def thread_clientes():                      ### Thread que espera conexões de clientes solicitando uma sala
     socket_clientes = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    socket_clientes.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)   ### Configura o socket para reutilizar o endereço e a porta
+
     socket_clientes.bind(('localhost', 5001))                   
     socket_clientes.listen()                                ### Espera clientes conectarem para pedir o endereço de uma sala vaga
     while True:
