@@ -26,7 +26,7 @@ A arquitetura do projeto foi definida com base na "ILustração da arquitetura",
 
 Com base na ilustração, depreende-se que a arquitetura é cocmposta por três principais componentes interconectados:
 
-## 1. Servidor Mestre (ou Servidor de Administração)
+### 1. Servidor Mestre (ou Servidor de Administração)
 
 - **Função:** Gerencia as solicitações dos clientes e coordena a criação e o estado das salas de jogos.
 - **Responsabilidades:**
@@ -34,7 +34,7 @@ Com base na ilustração, depreende-se que a arquitetura é cocmposta por três 
   - Envia o endereço da sala para os clientes.
   - Atualiza o estado das salas e notifica sobre novos jogos ou mudanças.
 
-## 2. Servidor de Processamento
+### 2. Servidor de Processamento
 
 - **Função:** Cria e gerencia salas de jogos e aguarda conexões dos clientes.
 - **Responsabilidades:**
@@ -42,7 +42,7 @@ Com base na ilustração, depreende-se que a arquitetura é cocmposta por três 
   - Aguarda conexões dos clientes e inicia o jogo quando dois clientes estão conectados.
   - Gerencia a comunicação entre os jogadores durante o jogo.
 
-## 3. Cliente
+### 3. Cliente
 
 - **Função:** Solicita uma sala ao Servidor Mestre e conecta-se ao Servidor de Processamento para jogar.
 - **Responsabilidades:**
