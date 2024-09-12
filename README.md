@@ -32,18 +32,17 @@ ip = Ip da sala que está esperando conexões de clientes
 
 Salas do Servidor de Processamento se conectam com o socket do servidor de Adminitração que espera conexçoes de sala. A sala então envia para o servidor Mestre o endereço do socket que está esperando conexões de clientes, após o jogo acabar a sala envia para o servidor de Administração as seguintes informações: op, resultado, erro, size e nome, onde resultado é utilizado para determinar se o jogo terminou por uma vitória ou algum erro, nome indica o nome do jogador que venceu a partida, em caso de erro(resultado != 1) erro indica o codigo do erro recebido.
 
-### Sala & Cliente
+### Cabeçalho da comunicação da sala com o cliente
 
-# Sala -> Cliente
+| Campo                | Tipo                | Descrição                                                                                                 |
+|----------------------|---------------------|-----------------------------------------------------------------------------------------------------------|
+| op                   | int (4 bytes)       | Tipo de operação solicitada pela sala: <br> - 1 -> Solicitação de posicionamento de navio <br> - 2 -> Solicitação de disparo <br> - 3 -> Indica que o jogo acabou <br> - 4 -> Solicitação para escolha do tipo de jogo (quantidade de cada navio) |
+| mensagem             | int (4 bytes)       | Dependendo de `op`: <br> - Quando `op = 1`: Tipo do navio a ser inserido <br> - Quando `op = 2`: Determina se foi uma vitória, derrota ou erro <br> - Quando `op = 4`: Indica qual jogo foi selecionado |
+| mapa jogador         | int array (100x4 bytes) | Mapa do jogador, utilizado quando `op = 1`, `op = 2`, ou `op = 3`                                        |
+| mapa adversario      | int array (100x4 bytes) | Mapa do adversário, utilizado quando `op = 2` ou `op = 3`                                                |
 
- ========================================= 
- |op (int 4 bytes)| mensagem(int 4 bytes)|          op = indica o tipo de operação solicitada pela sala: op = 1 -> solicitação de posicionamento de navio, mensagem o 
- |    mapa jogador (100 int 4 bytes)     |          tipo do navio que será inserido, op = 2 -> solicitação de disparo para o jogador, op = 3 -> indica que o jogo acabou
- |  mapa adversario (100 int 4 bytes)    |          mensagem é utilizada para determinar se foi uma vitória uma derrota ou se algum erro encerrou a partida
- =========================================          op = 4 -> solicita que um jogador escolha o tipo do jogo que será realizado(quantidade de cada navio)
-mapa da do jogador utilizado quando op = 1 | 2 | 3, mapa do adversário utilizado quando op = 2 | 3
+**Observação:** Após o jogador receber uma solicitação com `op` diferente de 3 (jogo finalizado), o jogador deve salvar os dados solicitados no cabeçalho e seu nome em UTF-8.
 
-Após o jogador receber uma solicitação diferente de op = 3(jogo finalizado), o jogador salva os dados solicitados no cabeçalho e seu nome em nome em modo utf-8
 
 ### Cliente -> Sala
 A comunicação entre o cliente e a sala terão o seguinte cabeçalho
