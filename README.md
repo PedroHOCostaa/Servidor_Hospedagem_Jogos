@@ -32,18 +32,44 @@ O cliente se conecta ao servidor de administração para solicitar uma sala e in
 
 ## Funcionamento dos componentes e comunicação
 
-## Servidor Hospedagem Jogos
-Sistema distribuido para hospedagem de salas de jogos, cliente solicita para um servidor mestre o endereço de uma sala para ele jogar, este servidor o envia o endereço
-e então ele se conecta neste endereço para jogar batalha naval(Jogo implementado para o Projeto), o sistema funciona utilizando os seguintes processos principais.
+### Servidor de Hospedagem de Jogos
 
-## Servidor de processamento
-O servidor de processamento solicita o numero de uma porta inicial X pelo terminal, inicia N threads salas, cada sala se conecta ao servidor mestre, as salas tentarão inciar um socket que espera conexões de clientes nas portas X até X+N-1, cada sala então avisa ao servidor Mestre o endereço vinculado a porta que está aguardando conexões de clientes, quando dois clientes se conectarem na sala, o jogo é iniciado, clientes trocam mensagems com a sala até o jogo finalizar. Após o jogo finalizar a sala avisa o servidor Mestre o resultado do jogo e tambem indica que está livre para clientes se conectarem.
+O sistema distribuído para hospedagem de salas de jogos é projetado para gerenciar a criação e o gerenciamento de salas de jogos. O fluxo de comunicação é o seguinte:
 
-## Cliente
-Cliente se conecta ao servidor Mestre e solicita uma sala, ao receber o endereço da sala ele encerra a conexão com o servidor mestre, o cliente então se conecta no socket da sala e espera/começa o jogo, clietes escolhem aonde querem inserir os navios e aonde irão atirar, após acabar o jogo o processo acaba.
+1. **Cliente**: Solicita ao Servidor Mestre o endereço de uma sala para jogar.
+2. **Servidor Mestre**: Envia o endereço da sala para o cliente.
+3. **Cliente**: Conecta-se ao endereço fornecido para jogar Batalha Naval (o único jogo implementado para este projeto).
 
-### Servidor Mestre ou Servidor de Adminitração
-O servidor mestre possui dois sockets que espeream conexões, um que espera conexões de salas e cria uma thread para lidar com ela, inicializando a sala antes do primeiro jogo e salvando seu endereço em um objeto sala e o colocando em uma fila salas, e após cada jogo acabar atualiza o estado do objeto sala. O segundo socket que espera conexões do servidor de Adminitração lida com os clientes, quando um cliente se conecta uma thread é iniciada para lidar com ele, a thread busca uma sala livre para este cliente se conectar, utilizando a lista salas, após encontrar uma sala livre, atualiza o estado da sala e envia seu endereço para o cliente, após isso a thread que lida com este cliente é finalizada e os sockets são fechados. Tanto a escrita no estado da sala em sua inicialização quanto a busca e atualização do valor na busca da sala para o cliente, são protegidas em uma região critica usando um semaforo, mantendo assim consistencia dos dados.
+O sistema é composto pelos seguintes processos principais:
+
+### Servidor de Processamento
+
+- **Inicialização**: O servidor de processamento solicita um número de porta inicial `X` pelo terminal.
+- **Criação de Salas**: Inicializa `N` threads para salas, cada uma associada a uma porta no intervalo de `X` a `X + N - 1`.
+- **Conexão com o Servidor Mestre**: Cada sala se conecta ao servidor mestre e notifica o endereço e a porta que está aguardando conexões.
+- **Gerenciamento do Jogo**: Quando dois clientes se conectam a uma sala, o jogo é iniciado. Os clientes trocam mensagens com a sala até que o jogo termine.
+- **Finalização**: Após o término do jogo, a sala informa o servidor mestre sobre o resultado e indica que está disponível para novos clientes.
+
+### Cliente
+
+- **Solicitação de Sala**: O cliente se conecta ao servidor mestre e solicita uma sala.
+- **Conexão com a Sala**: Após receber o endereço da sala, o cliente se desconecta do servidor mestre e se conecta ao socket da sala para iniciar o jogo.
+- **Participação no Jogo**: O cliente escolhe onde posicionar seus navios e onde disparar. Após o término do jogo, o processo é encerrado.
+
+### Servidor Mestre ou Servidor de Administração
+
+- **Conexão com Salas**: O servidor mestre possui um socket que aguarda conexões de salas. Para cada nova conexão, uma thread é criada para lidar com a sala:
+  - **Inicialização da Sala**: Inicializa a sala antes do primeiro jogo, salva seu endereço em um objeto sala e o coloca em uma fila de salas.
+  - **Atualização do Estado**: Após o término de cada jogo, o estado da sala é atualizado.
+
+- **Conexão com Clientes**: O servidor mestre possui um segundo socket que aguarda conexões de clientes:
+  - **Atendimento ao Cliente**: Quando um cliente se conecta, uma thread é criada para atendê-lo. A thread busca uma sala disponível para o cliente usando a lista de salas.
+  - **Envio de Endereço da Sala**: Após encontrar uma sala disponível, atualiza o estado da sala e envia seu endereço ao cliente.
+  - **Encerramento**: Após o envio do endereço, a thread que lida com o cliente é encerrada e os sockets são fechados.
+
+**Sincronização e Proteção de Dados**:
+- As operações de escrita no estado da sala e a busca e atualização do valor na busca da sala para o cliente são protegidas com uma região crítica usando um semáforo. Isso garante a consistência dos dados.
+
 
 # Fluxos de comunicação:
 
