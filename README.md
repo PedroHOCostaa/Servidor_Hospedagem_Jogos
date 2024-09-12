@@ -15,7 +15,7 @@ Este projeto é um sistema distribuído para a hospedagem de salas de jogos, esp
 
 A arquitetura do projeto foi definida com base na Imagem 1.
 
-![Ilustração da arquitetura](Arquitetura_e_fluxo_da_comunicação_SD.png)
+![Ilustração da arquitetura](Arquitetura_e_fluxo_da_comunicação_SD.drawio.png)
 
 
 ## Componentes do Sistema e Tecnologias
