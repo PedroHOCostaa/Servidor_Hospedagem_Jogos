@@ -17,11 +17,51 @@
 
 int jogadoresNaSalas[SALAS];
 
+void carregarMapa(struct mapa* mapaJogador, struct mapa* mapaAdversario, int * mapa_jogador, int * mapa_adversario)
+{
+    for(int i = 0; i < 10; i++)
+    {
+        for(int j = 0; j < 10; j++)
+        {
+            /// Salva os valores respectivos do mapa do jogador no vetor
+            if(mapaJogador->tabuleiro[i][j].superficie != NULL)
+            {
+                mapa_jogador[i*10 + j] = 0;
+            }else
+            {
+                mapa_jogador[i*10 + j] = (*(mapaJogador->tabuleiro[i][j].superficie)).tipo;
+                if ((*(mapaJogador->tabuleiro[i][j].superficie)).estado == 1)
+                {
+                    mapa_jogador[i*10 + j] = mapa_jogador[i*10 + j] + 10;
+                }
+            }
 
+            /// Salva os valores respectivos do mapa descoberto até o momento do adversario no vetor
+            if(mapaAdversario->mapaAdversario[i][j] == 'A')
+            {
+                mapa_adversario[i*10 + j] = 0;
+            }else if(mapaAdversario->mapaAdversario[i][j] == 'N')
+            {
+                mapa_adversario[i*10 + j] = 10;
+            }else if(mapaAdversario->mapaAdversario[i][j] == '1')
+            {
+                mapa_adversario[i*10 + j] = 1;
+            }else if(mapaAdversario->mapaAdversario[i][j] == '2')
+            {
+                mapa_adversario[i*10 + j] = 2;
+            }else if(mapaAdversario->mapaAdversario[i][j] == '3')
+            {
+                mapa_adversario[i*10 + j] = 3;
+            }else if(mapaAdversario->mapaAdversario[i][j] == '4')
+            {
+                mapa_adversario[i*10 + j] = 4;
+            }
+        }
+    }
+}
 
 void jogo(int jogador1, int jogador2)
 {
-    (void)jogador2; // Para indicar que o parâmetro não será utilizado
     struct mapa* mapaJogadorUm = (struct mapa*)malloc(sizeof(struct mapa));;
     struct mapa* mapaJogadorDois = (struct mapa*)malloc(sizeof(struct mapa));;
     int mapaVazio[100] = {0}; // Inicializa o vetor com 100 posições vazias
@@ -32,19 +72,17 @@ void jogo(int jogador1, int jogador2)
     int op = 4; // Indica operação de escolha do tipo de jogo
     int mensagem = 0; // Exemplo de mensagem inicial
     int orientacao;
-    int jogadores[2] = {jogador1, jogador2}; // Cria um array com os jogadores
     
 
-    int socket_cliente = jogadores[0]; // Pega o socket do jogador 1
     
     // Exemplo de uso da função
     int mapa_jogador[100] = {0};  // Inicializa com 100 posições vazias
     int mapa_adversario[100] = {0}; // Inicializa com 100 posições vazias
     
-    enviarParaCliente(socket_cliente, op, mensagem, mapa_jogador, mapa_adversario);
+    enviarParaCliente(jogador1, op, mensagem, mapa_jogador, mapa_adversario);
     
+    scanf("%d", &tipoJogo);
     printf("Jogador 1 escolheu o tipo de jogo: %d\n", ntohl(tipoJogo));
-    
 
     int qtdNavios[4], qtdNaviosJ1[4], qtdNaviosJ2[4], qtdTiros;
     if(tipoJogo == 1)
@@ -280,18 +318,19 @@ void* sala(void* arg)
         printf("Aguardando conexões de clientes na porta %d\n", ntohl(data->port));
 
         // Aceita uma conexão do servidor de comunicação
-        int client_socket = accept(communication_socket, NULL, NULL);
-        if (client_socket < 0) {
+        int *client_socket = malloc(sizeof(int));
+        *(client_socket) = accept(communication_socket, NULL, NULL);
+        if (*(client_socket) < 0) {
             perror("Erro ao aceitar conexão do servidor de comunicação");
             close(communication_socket);
             close(data->admin_socket);
             pthread_exit(NULL);
         }
-
         printf("Conexão estabelecida com o jogador 1.\n");
 
-        int client_socket2 = accept(communication_socket, NULL, NULL);
-        if (client_socket2 < 0) {
+        int *client_socket2 = malloc(sizeof(int));
+        *(client_socket2) = accept(communication_socket, NULL, NULL);
+        if (*(client_socket2) < 0) {
             perror("Erro ao aceitar conexão do servidor de comunicação");
             close(communication_socket);
             close(data->admin_socket);

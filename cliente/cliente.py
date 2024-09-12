@@ -103,9 +103,9 @@ def main():
                 # |    mapa jogador (100 int 4 bytes)     | #           # Mensagem recebida da sala de jogo #
                 # |  mapa adversario (100 int 4 bytes)    | #           
                 # ========================================= #
-            
+            print("Esperando mensagem da sala")
             op, mensagem, mapa_jogador, mapa_adversario = struct.unpack('!II100I100I', socket_sala.recv(808))
-
+            print("Pacote recebido da sala, op: ", op, " mensagem: ", mensagem)
 
             if(op == 1):              ### Jogador escolhe aonde irá colocar o Navio ###
                 printa_mapa(mapa_jogador)
