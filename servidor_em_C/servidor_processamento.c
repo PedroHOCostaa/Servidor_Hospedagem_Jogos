@@ -13,21 +13,10 @@
 #define PORT "5000"
 #define HOST "127.0.0.1"       // IP do servidor admin
 #define SALAS 5
-#define MEU_IP "192.168.150.92" // IP do servidor 
+#define MEU_IP "127.0.0.1" // IP do servidor 
 
 int jogadoresNaSalas[SALAS];
 
-int realizarTiroJogador(struct mapa* mapaAdversario)
-{
-    int colunaAlvo, linhaAlvo;
-    printf("Digite a linha em que o tiro será disparado: ");
-    scanf("%d", &colunaAlvo);
-    printf("Digite a coluna em que o tiro será disparado: ");
-    scanf("%d", &linhaAlvo);
-    int resultado = realizarTiro(mapaAdversario, colunaAlvo, linhaAlvo);
-    
-    return resultado;
-}
 
 
 void jogo(int jogador1, int jogador2)
@@ -220,7 +209,7 @@ void* sala(void* arg)
     int porta_sala = *((int*)arg); // Porta da sala
     char* ip_sala = MEU_IP; // IP da sala
     free(arg);
-
+    printf("Porta da sala: %d\n", porta_sala);
     // Ponto 1: Criação do socket para o servidor de administração
     int admin_socket = socket(AF_INET, SOCK_STREAM, 0); 
     if (admin_socket < 0) {
@@ -368,21 +357,27 @@ void enviarParaCliente(int socket, int op, int mensagem, int mapa_jogador[100], 
     // Preenche a estrutura com os dados
     dados.op = htonl(op);  // Converte para a ordem de bytes da rede
     dados.mensagem = htonl(mensagem);
+    ssize_t tamanho_mensagem_enviada = 0;
+    send(socket, dados.op, sizeof(dados.op), 0);
+    tamanho_mensagem_enviada = tamanho_mensagem_enviada + sizeof(dados.op);
+    send(socket, dados.mensagem, sizeof(dados.mensagem), 0);
+    tamanho_mensagem_enviada = tamanho_mensagem_enviada + sizeof(dados.mensagem);
     
     // Converte os mapas para a ordem de bytes da rede
     for (int i = 0; i < 100; ++i) {
-        dados.mapa_jogador[i] = htonl(mapa_jogador[i]);
-        dados.mapa_adversario[i] = htonl(mapa_adversario[i]);
+        send(socket, htonl(mapa_jogador[i]), sizeof(dados.mapa_jogador[i]), 0);
+        tamanho_mensagem_enviada = tamanho_mensagem_enviada + sizeof(dados.mapa_jogador[i]);
+    }
+    
+    for (int i = 0; i < 100; ++i) {
+        send(socket, htonl(mapa_adversario[i]), sizeof(dados.mapa_adversario[i]), 0);
+        tamanho_mensagem_enviada = tamanho_mensagem_enviada + sizeof(dados.mapa_adversario[i]);
     }
     
     // Envia a estrutura para o cliente
-    ssize_t bytes_enviados = send(socket, &dados, sizeof(dados), 0);
-    if (bytes_enviados == -1) {
-        perror("Erro ao enviar dados para o cliente");
-        exit(EXIT_FAILURE);
-    }
+
     
-    printf("Dados enviados para o cliente. Bytes enviados: %zd\n", bytes_enviados);
+    printf("Dados enviados para o cliente. Bytes enviados: %zd\n", tamanho_mensagem_enviada);
 }
 
 int main()
