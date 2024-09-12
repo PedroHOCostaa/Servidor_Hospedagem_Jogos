@@ -22,19 +22,6 @@ endereco_servidor_adm = ('localhost', 5001)
 # | size (int 4 bytes) |        ip (string size bytes)       | #
 # ============================================================ #
 
-### Cliente -> Sala de jogo
-
-# ================================================ #
-# | op (int 4 bytes)|    coluna (int 4 bytes)    | #
-# | linha (int 4 bytes)| orientacao (int 4 bytes)| #
-# | size (int 4 bytes) |   nome (string size)    | #
-# ================================================ #
-            #        #
-            #   ||   #
-            #   ||   #
-            #  \||/  #
-            #   \/   #
-            #        #
 ### Sala de jogo -> Cliente
 
 # ========================================= #
@@ -42,7 +29,19 @@ endereco_servidor_adm = ('localhost', 5001)
 # |    mapa jogador (100 int 4 bytes)     | #
 # |  mapa adversario (100 int 4 bytes)    | #       
 # ========================================= #
+            #        #
+            #   ||   #
+            #   ||   #
+            #  \||/  #
+            #   \/   #
+            #        #
+### Cliente -> Sala de jogo
 
+# ================================================ #
+# | op (int 4 bytes)|    coluna (int 4 bytes)    | #
+# | linha (int 4 bytes)| orientacao (int 4 bytes)| #
+# | size (int 4 bytes) |   nome (string size)    | #
+# ================================================ #
 
 def printa_mapa(mapa):
     print("  0 1 2 3 4 5 6 7 8 9")
@@ -110,6 +109,7 @@ def main():
 
             if(op == 1):              ### Jogador escolhe aonde irá colocar o Navio ###
                 printa_mapa(mapa_jogador)
+                print("Navio de tipo #{mensagem}")  ### Mensgem que indica o tipo do navio que o jogador deve colocar
                 orientacao = int(input("Digite 0 para orientação original e 1 para invertida: "))
                 coluna = int(input("Digite a posição na coluna: "))
                 linha = int(input("Digite a posição na linha: "))
@@ -145,5 +145,6 @@ def main():
                 # ================================================ #        # ======================================================================== #
 
             socket_sala.send(cabecalho + nome)      ### Envia a mensagem para a sala de jogo ###
+        socket_sala.close()                         ### Fecha o socket de comunicação com a sala de jogo
 
 main()

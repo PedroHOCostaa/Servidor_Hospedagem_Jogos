@@ -27,12 +27,24 @@ lista_thrads_servidor = []
 # | size (int 4 bytes) | nome (string utf-8 size bytes)| #
 # ====================================================== #
 
-### Sala do servidor de processamento -> Servidor de administração
+### Cliente -> Sala de jogo
 
-# ============================================================ #
-# | op (int 4 bytes)| port (int 4 bytes)| error (int 4 bytes)| #
-# | size (int 4 bytes) |    ip (string utf-8 size bytes)     | #
-# ============================================================ #
+# ================================================ #
+# | op (int 4 bytes)|    coluna (int 4 bytes)    | #
+# | linha (int 4 bytes)| orientacao (int 4 bytes)| #
+# | size (int 4 bytes) |   nome (string size)    | #
+# ================================================ #
+
+
+
+### Sala de jogo -> Cliente
+
+# ========================================= #
+# |op (int 4 bytes)| mensagem(int 4 bytes)| #
+# |    mapa jogador (100 int 4 bytes)     | #
+# |  mapa adversario (100 int 4 bytes)    | #       
+# ========================================= #
+
 
 
 
