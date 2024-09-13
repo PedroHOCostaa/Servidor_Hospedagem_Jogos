@@ -86,10 +86,10 @@ void carregarMapa(struct mapa* mapaJogador, struct mapa* mapaAdversario, int * m
         for(int j = 0; j < 10; j++)
         {
             /// Salva os valores respectivos do mapa do jogador no vetor
-            if(mapaJogador->tabuleiro[i][j].superficie != NULL)
+            if(mapaJogador->tabuleiro[i][j].indicador == 0)
             {
-                mapa_jogador[i*10 + j] = 0;
-            }else
+                mapa_jogador[i*10 + j] = 0;         // 0: Água
+            }else                                   // 1: Navio
             {
                 mapa_jogador[i*10 + j] = (*(mapaJogador->tabuleiro[i][j].superficie)).tipo;
                 if ((*(mapaJogador->tabuleiro[i][j].superficie)).estado == 1)
@@ -122,10 +122,12 @@ void carregarMapa(struct mapa* mapaJogador, struct mapa* mapaAdversario, int * m
     }
 }
 
-void jogo(int jogador1, int jogador2)
+int jogo(int jogador1, int jogador2, struct admin_data* data)
 {
     struct mapa* mapaJogadorUm = (struct mapa*)malloc(sizeof(struct mapa));;
+    inicializaMapa(mapaJogadorUm);
     struct mapa* mapaJogadorDois = (struct mapa*)malloc(sizeof(struct mapa));;
+    inicializaMapa(mapaJogadorDois);
     int mapaVazio[100] = {0}; // Inicializa o vetor com 100 posições vazias
     
     int tipoJogo = 0;
@@ -135,8 +137,7 @@ void jogo(int jogador1, int jogador2)
     int mensagem = 0; // Exemplo de mensagem inicial
     int orientacao;
     int decisao;
-    int coluna;
-    int linha;
+    int ancoraColuna, ancoraLinha;
     char nomeJogador1[256];
     char nomeJogador2[256];
 
@@ -147,7 +148,7 @@ void jogo(int jogador1, int jogador2)
     
     enviarParaCliente(jogador1, op, mensagem, mapaVazio, mapaVazio);
     
-    receberDoCliente(socket, &op, &coluna, &linha, &decisao, nomeJogador1);
+    receberDoCliente(jogador1, &op, &ancoraColuna, &ancoraLinha, &decisao, nomeJogador1);
     
     printf("Jogador 1 escolheu o tipo de jogo: %d\n", decisao);
     tipoJogo = decisao;
@@ -155,9 +156,9 @@ void jogo(int jogador1, int jogador2)
     if(tipoJogo == 1)
     {
         qtdNaviosJ2[0] = qtdNaviosJ1[0] = qtdNavios[0] = 1;
-        qtdNaviosJ2[1] = qtdNaviosJ1[1] = qtdNavios[1] = 0;
-        qtdNaviosJ2[2] = qtdNaviosJ1[2] = qtdNavios[2] = 0;
-        qtdNaviosJ2[3] = qtdNaviosJ1[3] = qtdNavios[3] = 0;
+        qtdNaviosJ2[1] = qtdNaviosJ1[1] = qtdNavios[1] = 1;
+        qtdNaviosJ2[2] = qtdNaviosJ1[2] = qtdNavios[2] = 1;
+        qtdNaviosJ2[3] = qtdNaviosJ1[3] = qtdNavios[3] = 1;
         qtdTiros = 1;
     }
     if(tipoJogo == 2)
@@ -170,7 +171,6 @@ void jogo(int jogador1, int jogador2)
     }
     
 
-    int ancoraColuna, ancoraLinha;
     struct navio* novoNavio;
     int criado = 0;
     
@@ -183,17 +183,21 @@ void jogo(int jogador1, int jogador2)
                 // Envia solicitação para o cliente posicionar o navio
                 op = 1; // Indica operação de posicionar navio
                 mensagem = i; // Exemplo de mensagem inicial
+                printf("ponto 1\n");
                 carregarMapa(mapaJogadorUm, mapaJogadorDois, mapa_jogador, mapa_adversario); // Carrega os mapas
+                printf("ponto 2\n");
                 enviarParaCliente(jogador1, op, mensagem, mapaVazio, mapaVazio);
-                
-                receberDoCliente(socket, &op, &coluna, &linha, &orientacao, nomeJogador1);
-                /// Jogador seleciona posição do navio, está secção será substituida por uma operação de socket para receber estes dados            
+                printf("ponto 3\n");
+                // Recebe do cliente a posição do navio que tentará ser inserido no mapa
+                receberDoCliente(jogador1, &op, &ancoraColuna, &ancoraLinha, &orientacao, nomeJogador1);
+                printf("ponto 4\n");
 
-            if(criado == 0)
+
+            if(criado == 0) // Verifica se o navio foi inicializado, se ja foi não ira o inicializar novamente
             {
-                novoNavio = (struct navio*)malloc(sizeof(struct navio));
-                inicializaNavio(novoNavio, i, orientacao);
-                criado = 1;
+                novoNavio = (struct navio*)malloc(sizeof(struct navio));    // Aloca memória para o novo navio
+                inicializaNavio(novoNavio, i, orientacao);                  // Inicializa o navio, com o tipo e orientação e cria a estrutura dele
+                criado = 1;                                                 // Marca que o navio foi criado
                 printf("Navio criado\n");
             }
             printf("Navio do tipo %d orientação %d na posicao %d %d\n", novoNavio->tipo, novoNavio->orientacao, ancoraColuna, ancoraLinha);
@@ -207,7 +211,6 @@ void jogo(int jogador1, int jogador2)
                 printf("Navio não inserido\n");
             }
             imprimirMeuMapa(mapaJogadorUm);
-            //imprimirMapaAdversario(mapaJogadorUm);
         }
     }
     printf("Jogador 1 pronto\n");
@@ -217,19 +220,20 @@ void jogo(int jogador1, int jogador2)
         printf("Navio do tipo %d\n", i);
         while(qtdNaviosJ2[i] > 0)
         {
-                /// Jogador seleciona posição do navio, está secção será substituida por uma operação de socket para receber estes dados
-                printf("%d navios restantes\n", qtdNaviosJ2[i]);
-                printf("Digite a orientação do navio: ");
-                scanf("%d", &orientacao);
-                printf("Digite a ancora da coluna do navio: ");
-                scanf("%d", &ancoraColuna);
-                printf("Digite a ancora da linha do navio: ");
-                scanf("%d", &ancoraLinha);
+                // Envia solicitação para o cliente posicionar o navio
+                op = 1; // Indica operação de posicionar navio
+                mensagem = i; // Exemplo de mensagem inicial
+                carregarMapa(mapaJogadorDois, mapaJogadorUm, mapa_jogador, mapa_adversario); // Carrega os mapas
+                enviarParaCliente(jogador2, op, mensagem, mapaVazio, mapaVazio);
+                
+                // Recebe do cliente a posição do navio que tentará ser inserido no mapa
+                receberDoCliente(jogador2, &op, &ancoraColuna, &ancoraLinha, &orientacao, nomeJogador2);
+
             if(criado == 0)
             {
-                novoNavio = (struct navio*)malloc(sizeof(struct navio));
-                inicializaNavio(novoNavio, i, orientacao);
-                criado = 1;
+                novoNavio = (struct navio*)malloc(sizeof(struct navio));    // Aloca memória para o novo navio
+                inicializaNavio(novoNavio, i, orientacao);                  // Inicializa o navio, com o tipo e orientação e cria a estrutura dele
+                criado = 1;                                                 // Marca que o navio foi criado
                 printf("Navio criado\n");
             }
             printf("Navio do tipo %d orientação %d na posicao %d %d\n", novoNavio->tipo, novoNavio->orientacao, ancoraColuna, ancoraLinha);
@@ -237,75 +241,111 @@ void jogo(int jogador1, int jogador2)
             {
                 qtdNaviosJ2[i]--;
                 criado = 0;
-                    /// Servidor envia uma mensagem sobre o resultado para o servidor de comunicação
                     printf("Navio inserido\n");
             }else
             {
-                    /// Servidor envia uma mensagem sobre o resultado para o servidor de comunicação
                     printf("Navio não inserido\n"); 
             }
             imprimirMeuMapa(mapaJogadorDois);
-            //imprimirMapaAdversario(mapaJogadorDois);
         }
     }
     printf("Jogador 2 pronto\n");
+
+
     int vencedor = 0;
     int alvoColuna, alvoLinha;
-    while(vencedor == 0)
+    while(1)
     {
         printf("passou\n");
         if(vencedor == 0)
+        
+        for(int i = 0; i < qtdTiros; i++)
         {
-            for(int i = 0; i < qtdTiros; i++)
+            
+            // Jogador1 recebe uma solicitação para realizar um disparo e devolve a sala a posição do disparo
+            printf("Jogador 1 selecione a região que irá realizar o tiro\n");
+            // Envia solicitação para o cliente posicionar o navio
+            op = 2; // Indica operação de realizar um disparo
+            carregarMapa(mapaJogadorUm, mapaJogadorDois, mapa_jogador, mapa_adversario); // Carrega os mapas
+            enviarParaCliente(jogador1, op, mensagem, mapaVazio, mapaVazio);
+            
+            // Recebe do cliente a posição do navio que tentará ser inserido no mapa
+            receberDoCliente(jogador1, &op, &alvoColuna, &alvoLinha, &orientacao, nomeJogador1);
+
+
+            int resultado = realizarTiro(mapaJogadorDois, alvoColuna, alvoLinha);
+            if(resultado == 0)
+                printf("Tiro na agua!\n");
+            if(resultado == 1)
+                printf("Tiro acertou um navio\n");
+            if(resultado == 2)
             {
-                    /// Jogador 1 seleciona posição do tiro, está secção será substituida por uma operação de socket para receber estes dados
-                    printf("Jogador 1 selecione a região que irá realizar o tiro\n");
-                    scanf("%d %d", &alvoColuna, &alvoLinha);
-                int resultado = realizarTiro(mapaJogadorDois, alvoColuna, alvoLinha);
-                if(resultado == 0)
-                    printf("Tiro na agua!\n");
-                if(resultado == 1)
-                    printf("Tiro acertou um navio\n");
-                if(resultado == 2)
+                printf("Tiro acertou um navio e o afundou\n");
+                if(verificaPerdedor(mapaJogadorDois) == 1)
                 {
-                    printf("Tiro acertou um navio e o afundou\n");
-                    if(verificaPerdedor(mapaJogadorDois) == 1)
-                    {
-                        printf("Jogador 1 venceu\n");
-                        vencedor = 1;
-                        i = qtdTiros;
-                    }
+                    // Envia um aviso para os clientes que a partida acabou
+                    op = 3; // Indica que o jogo foi terminado
+                    mensagem = 1; // Indica que o jogador 1 venceu
+                    carregarMapa(mapaJogadorUm, mapaJogadorDois, mapa_jogador, mapa_adversario); // Carrega os mapas
+                    enviarParaCliente(jogador1, op, mensagem, mapaVazio, mapaVazio);
+                    mensagem = 2; // Indica que o jogador 2 perdeu
+                    carregarMapa(mapaJogadorDois, mapaJogadorUm, mapa_jogador, mapa_adversario); // Carrega os mapas
+                    enviarParaCliente(jogador2, op, mensagem, mapaVazio, mapaVazio);
+
+                    // Envia para o servidor de administração o resultado do jogo e avisa que a sala está vazia
+                    data->op = htonl(2);// indica que é uma atualização de estado da sala                //# ============================================================ #
+                    data->port = htonl(0);                                                               //# | op (int 4 bytes)| port (int 4 bytes)| error (int 4 bytes)| #
+                    data->error = htonl(0);                                                              //# | size (int 4 bytes) |        ip (string size bytes)       | #
+                    data->ip_size = strlen(nomeJogador1);       // Tamanho do nome                       //# ============================================================ #
+                    strcpy(data->ip, nomeJogador1);             // Copiar o nome para a estrutura
+                    data->error = 0;                            // Código de erro
+                    comunicar_com_admin(data);
+                    return 1;
                 }
-                imprimirMapaAdversario(mapaJogadorDois);
             }
+            imprimirMapaAdversario(mapaJogadorDois);
         }
-        if(vencedor == 0)
+        
+        for(int i = 0; i < qtdTiros; i++)
         {
-            for(int i = 0; i < qtdTiros; i++)
+            // Jogador2 recebe uma solicitação para realizar um disparo e devolve a posição do disparo
+            op = 2; // Indica operação de realizar um disparo
+            carregarMapa(mapaJogadorDois, mapaJogadorUm, mapa_jogador, mapa_adversario); // Carrega os mapas
+            enviarParaCliente(jogador2, op, mensagem, mapaVazio, mapaVazio);
+            
+            // Recebe do cliente a posição do navio que tentará ser inserido no mapa
+            receberDoCliente(jogador2, &op, &alvoColuna, &alvoLinha, &orientacao, nomeJogador1);
+
+
+            int resultado = realizarTiro(mapaJogadorUm, alvoColuna, alvoLinha);
+            if(resultado == 2)
             {
-                    /// Jogador 2 seleciona posição do tiro, está secção será substituida por uma operação de socket para receber estes dados
-                    printf("Jogador 2 selecione a região que irá realizar o tiro\n");
-                    scanf("%d %d", &alvoColuna, &alvoLinha);
-                int resultado = realizarTiro(mapaJogadorUm, alvoColuna, alvoLinha);
-                if(resultado == 0)
-                    printf("Tiro na agua!\n");
-                if(resultado == 1)
-                    printf("Tiro acertou um navio\n");
-                if(resultado == 2)
+                printf("Tiro acertou um navio e o afundou\n");
+                if(verificaPerdedor(mapaJogadorUm) == 1)
                 {
-                    printf("Tiro acertou um navio e o afundou\n");
-                    if(verificaPerdedor(mapaJogadorUm) == 1)
-                    {
-                        printf("Jogador 1 venceu\n");
-                        vencedor = 2;
-                        i = qtdTiros;
-                    }
+                    // Envia um aviso para os clientes que a partida acabou
+                    op = 3; // Indica que o jogo foi terminado
+                    mensagem = 2; // Indica que o jogador 1 perdeu
+                    carregarMapa(mapaJogadorUm, mapaJogadorDois, mapa_jogador, mapa_adversario); // Carrega os mapas
+                    enviarParaCliente(jogador1, op, mensagem, mapaVazio, mapaVazio);
+                    mensagem = 1; // Indica que o jogador 2 venceu
+                    carregarMapa(mapaJogadorDois, mapaJogadorUm, mapa_jogador, mapa_adversario); // Carrega os mapas
+                    enviarParaCliente(jogador2, op, mensagem, mapaVazio, mapaVazio);
+
+                    // Envia para o servidor de administração o resultado do jogo e avisa que a sala está vazia
+                    data->op = htonl(2);// indica que é uma atualização de estado da sala                //# ============================================================ #
+                    data->port = htonl(0);                                                               //# | op (int 4 bytes)| port (int 4 bytes)| error (int 4 bytes)| #
+                    data->error = htonl(0);                                                              //# | size (int 4 bytes) |        ip (string size bytes)       | #
+                    data->ip_size = strlen(nomeJogador2);       // Tamanho do nome                       //# ============================================================ #
+                    strcpy(data->ip, nomeJogador2);             // Copiar o nome para a estrutura
+                    data->error = 0;                            // Código de erro
+                    comunicar_com_admin(data);
+                    return 1;
                 }
-                imprimirMapaAdversario(mapaJogadorUm);
-            }        
+            }
+            imprimirMapaAdversario(mapaJogadorUm);
         }
     }
-    printf("Fim de jogo\n Jogador %d venceu!!!/n", vencedor);
 }
 
 
@@ -405,7 +445,7 @@ void* sala(void* arg)
 
         printf("Conexão estabelecida com o jogador 2.\n");
         
-        jogo(client_socket, client_socket2); // Função do jogo 
+        jogo(client_socket, client_socket2, data); // Função do jogo 
 
         /// avisa para o servidor de administração que a sala está vazia e retorna quem ganhou ou se houve erro
     }
@@ -428,11 +468,7 @@ void comunicar_com_admin(struct admin_data* data) {
         pthread_exit(NULL);
     }
 
-    // Converter os dados para big-endian
-    int net_op = htonl(data->op); 
-    int net_port = htonl(data->port);
-    int net_error = htonl(data->error);
-    int net_ip_size = htonl(data->ip_size);
+
 
     memcpy(buffer, &data->op, sizeof(int));                         // Copiar operação
     memcpy(buffer + sizeof(int), &data->port, sizeof(int));         // Copiar porta
