@@ -336,10 +336,10 @@ int jogo(int jogador1, int jogador2, struct admin_data* data)
                     op = 3; // Indica que o jogo foi terminado
                     mensagem = 2; // Indica que o jogador 1 perdeu
                     carregarMapa(mapaJogadorUm, mapaJogadorDois, mapa_jogador, mapa_adversario); // Carrega os mapas
-                    enviarParaCliente(jogador1, op, mensagem, mapaVazio, mapaVazio);
+                    enviarParaCliente(jogador1, op, mensagem, mapa_jogador, mapa_adversario);
                     mensagem = 1; // Indica que o jogador 2 venceu
                     carregarMapa(mapaJogadorDois, mapaJogadorUm, mapa_jogador, mapa_adversario); // Carrega os mapas
-                    enviarParaCliente(jogador2, op, mensagem, mapaVazio, mapaVazio);
+                    enviarParaCliente(jogador2, op, mensagem, mapa_jogador, mapa_adversario);
 
                     // Envia para o servidor de administração o resultado do jogo e avisa que a sala está vazia
                     data->op = htonl(2);// indica que é uma atualização de estado da sala                //# ============================================================ #

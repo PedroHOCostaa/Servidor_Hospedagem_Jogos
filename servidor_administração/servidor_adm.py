@@ -86,9 +86,9 @@ def thread_handle_sala(conn, addr):     ### Thread é iniciada quando uma sala s
         ### Utilizado op para verificar se o jogo acabou por qual motivo, se foi uma vitória ou erro
         ### Utiliza o endereço da sala e nome do jogador vencedor para salvar no log e fazer uma leaderboard
         if resultado == 1:  ### Indica que o jogo acabou por vitória
-            print("Jogo acabou, o jogador ", nome, " venceu a partida na sala ", sala_atual.id,"\n")
+            print("Jogo acabou, o jogador ", nome, " venceu a partida na sala ", sala_atual.ip,"\n")
         else:               ### Indica que o jogo acabou por erro
-            print("Jogo da sala: ", sala_atual.id, "encerrou por motivo de erros, codigo do erro:",erro,"\n")
+            print("Jogo da sala: ", sala_atual.ip, sala_atual.port, "encerrou por motivo de erros, codigo do erro:",erro,"\n")
 
 
         ### Marca a sala como disponível para um novo jogo
