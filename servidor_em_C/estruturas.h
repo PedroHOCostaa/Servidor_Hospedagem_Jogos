@@ -36,8 +36,8 @@ struct navio {
     int ancoraColuna, ancoraLinha, tamanhoColuna, tamanhoLinha;         // exemplo1: para um barco {{1, 1}} possui tamanhoColuna 1 e tamanhoLinha 2 e se ancora estiver em {0,0} 
     int orientacao;                                                     // o barco estará em {0,0} e {0,1}
     int tipo;                                                           // exemplo2: para um barco {{1,1,1},{1,1,1}} possui tamanhoColuna 2 e tamanhoLinha 3 e se ancora estiver em {0,0}
-    int** estrutura;                                                    // o barco estará em {0,0}, {0,1}, {0,2}, {1,0}, {1,1}, {1,2}
-    int estado;                                                         
+    int** estrutura;                                                    // o barco estará em {0,0}, {0,1}, {0,2}, {1,0}, {1,1}, {1,2}, vale 1 se foi atingido e 0 no inicio
+    int estado;                                                         // vale 1 no inicio e vale 0 se destruido
 };
 
 struct celula {

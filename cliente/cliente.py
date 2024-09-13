@@ -44,11 +44,11 @@ endereco_servidor_adm = ('localhost', 5001)
 # ================================================ #
 
 def printa_mapa(mapa):
-    print("  0 1 2 3 4 5 6 7 8 9")
+    print(" \t0\t1\t2\t3\t4\t5\t6\t7\t8\t9")
     for i in range(10):
-        print(i, end=" ")
+        print(i, end="")
         for j in range(10):
-            print(mapa[i*10 + j], end=" ")
+            print("\t",mapa[i*10 + j], end="")
         print()
 
 
@@ -117,15 +117,18 @@ def main():
             print("Pacote recebido da sala, op: ", op, " mensagem: ", mensagem)
 
             if(op == 1):              ### Jogador escolhe aonde irá colocar o Navio ###
+                print("Mapa jogador")
                 printa_mapa(mapa_jogador)
-                print("Navio de tipo #{mensagem}")  ### Mensgem que indica o tipo do navio que o jogador deve colocar
+                print("Navio de tipo: ", mensagem)  ### Mensgem que indica o tipo do navio que o jogador deve colocar
                 orientacao = int(input("Digite 0 para orientação original e 1 para invertida: "))
                 coluna = int(input("Digite a posição na coluna: "))
                 linha = int(input("Digite a posição na linha: "))
                 cabecalho = struct.pack('!IIIII', 1, coluna, linha, orientacao, len(nome))
 
             elif(op == 2):              ### Jogador realiza um disparo ###
+                print("Mapa jogador")
                 printa_mapa(mapa_jogador)
+                print("Mapa adversario")
                 printa_mapa(mapa_adversario)
                 coluna = int(input("Digite a posição na coluna para realizar um disparo: "))
                 linha = int(input("Digite a posição na linha para realizar um disparo: "))

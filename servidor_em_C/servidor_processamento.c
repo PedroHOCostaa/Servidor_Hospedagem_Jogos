@@ -86,37 +86,50 @@ void carregarMapa(struct mapa* mapaJogador, struct mapa* mapaAdversario, int * m
         for(int j = 0; j < 10; j++)
         {
             /// Salva os valores respectivos do mapa do jogador no vetor
-            if(mapaJogador->tabuleiro[i][j].indicador == 0)
+            if(mapaJogador->tabuleiro[i][j].indicador == 0) // indicador == 0: Água
             {
-                mapa_jogador[i*10 + j] = 0;         // 0: Água
-            }else                                   // 1: Navio
-            {
-                mapa_jogador[i*10 + j] = (*(mapaJogador->tabuleiro[i][j].superficie)).tipo;
-                if ((*(mapaJogador->tabuleiro[i][j].superficie)).estado == 1)
+                mapa_jogador[i*10 + j] = 20;         // mapa recebe = 20: Água
+            }else                                   // indicador == 1: Navio
+            {                                                                  // barco 30 = desconhecido, 40 = tipo 0, 50 = tipo 1, 60 = tipo 2, 70 = tipo 3
+                struct navio* navio = mapaJogador->tabuleiro[i][j].superficie;
+                if ((*(navio)).estado == 0)           // 0: Navio destruido
+                {                                                              
+                    mapa_jogador[i*10 + j] = ((navio->tipo + 4) * 10) + 5;     // mapa recebe casa da dezena do codigo do barco + 5: Navio destruido
+                }else
                 {
-                    mapa_jogador[i*10 + j] = mapa_jogador[i*10 + j] + 10;
+                    int ancoraColuna = navio->ancoraColuna;
+                    int ancoraLinha = navio->ancoraLinha;
+                    if ((*(navio)).estrutura[i - ancoraColuna][j - ancoraLinha] == 1)
+                    {   /// Parte do navio atingida
+                        mapa_jogador[i*10 + j] = ((navio->tipo + 4) * 10) + 1;      // mapa recebe dezena do codigo do barco + 1: Parte do navio destruida
+                    }else
+                    {
+                        mapa_jogador[i*10 + j] = (navio->tipo + 4) * 10;           // mapa recebe dezena do codigo do barco: Parte do navio integral
+                    }
                 }
             }
 
             /// Salva os valores respectivos do mapa descoberto até o momento do adversario no vetor
             if(mapaAdversario->mapaAdversario[i][j] == 'A')
             {
-                mapa_adversario[i*10 + j] = 0;
+                mapa_adversario[i*10 + j] = 20;
             }else if(mapaAdversario->mapaAdversario[i][j] == 'N')
             {
-                mapa_adversario[i*10 + j] = 10;
+                mapa_adversario[i*10 + j] = 31;
+            }else if(mapaAdversario->mapaAdversario[i][j] == '0')
+            {
+                mapa_adversario[i*10 + j] = 45;
             }else if(mapaAdversario->mapaAdversario[i][j] == '1')
             {
-                mapa_adversario[i*10 + j] = 1;
+                mapa_adversario[i*10 + j] = 55;
             }else if(mapaAdversario->mapaAdversario[i][j] == '2')
             {
-                mapa_adversario[i*10 + j] = 2;
+                mapa_adversario[i*10 + j] = 65;
             }else if(mapaAdversario->mapaAdversario[i][j] == '3')
             {
-                mapa_adversario[i*10 + j] = 3;
-            }else if(mapaAdversario->mapaAdversario[i][j] == '4')
-            {
-                mapa_adversario[i*10 + j] = 4;
+                mapa_adversario[i*10 + j] = 75;
+            }else{              /// Se não a conhecimento doque tem na posição
+                mapa_adversario[i*10 + j] = 10;
             }
         }
     }
@@ -128,7 +141,7 @@ int jogo(int jogador1, int jogador2, struct admin_data* data)
     inicializaMapa(mapaJogadorUm);
     struct mapa* mapaJogadorDois = (struct mapa*)malloc(sizeof(struct mapa));;
     inicializaMapa(mapaJogadorDois);
-    int mapaVazio[100] = {0}; // Inicializa o vetor com 100 posições vazias
+    int mapaVazio[100] = {10}; // Inicializa o vetor com 100 posições vazias
     
     int tipoJogo = 0;
     
@@ -143,8 +156,8 @@ int jogo(int jogador1, int jogador2, struct admin_data* data)
 
     
     // Exemplo de uso da função
-    int mapa_jogador[100] = {0};  // Inicializa com 100 posições vazias
-    int mapa_adversario[100] = {0}; // Inicializa com 100 posições vazias
+    int mapa_jogador[100] = {10};  // Inicializa com 100 posições valendo 10
+    int mapa_adversario[100] = {10}; // Inicializa com 100 posições valendo 10
     
     enviarParaCliente(jogador1, op, mensagem, mapaVazio, mapaVazio);
     
@@ -157,8 +170,8 @@ int jogo(int jogador1, int jogador2, struct admin_data* data)
     {
         qtdNaviosJ2[0] = qtdNaviosJ1[0] = qtdNavios[0] = 1;
         qtdNaviosJ2[1] = qtdNaviosJ1[1] = qtdNavios[1] = 1;
-        qtdNaviosJ2[2] = qtdNaviosJ1[2] = qtdNavios[2] = 1;
-        qtdNaviosJ2[3] = qtdNaviosJ1[3] = qtdNavios[3] = 1;
+        qtdNaviosJ2[2] = qtdNaviosJ1[2] = qtdNavios[2] = 0;
+        qtdNaviosJ2[3] = qtdNaviosJ1[3] = qtdNavios[3] = 0;
         qtdTiros = 1;
     }
     if(tipoJogo == 2)
@@ -180,17 +193,13 @@ int jogo(int jogador1, int jogador2, struct admin_data* data)
         printf("Navio do tipo %d\n", i);
         while(qtdNaviosJ1[i] > 0)
         {
-                // Envia solicitação para o cliente posicionar o navio
-                op = 1; // Indica operação de posicionar navio
-                mensagem = i; // Exemplo de mensagem inicial
-                printf("ponto 1\n");
-                carregarMapa(mapaJogadorUm, mapaJogadorDois, mapa_jogador, mapa_adversario); // Carrega os mapas
-                printf("ponto 2\n");
-                enviarParaCliente(jogador1, op, mensagem, mapaVazio, mapaVazio);
-                printf("ponto 3\n");
-                // Recebe do cliente a posição do navio que tentará ser inserido no mapa
-                receberDoCliente(jogador1, &op, &ancoraColuna, &ancoraLinha, &orientacao, nomeJogador1);
-                printf("ponto 4\n");
+            // Envia solicitação para o cliente posicionar o navio
+            op = 1; // Indica operação de posicionar navio
+            mensagem = i; // Exemplo de mensagem inicial
+            carregarMapa(mapaJogadorUm, mapaJogadorDois, mapa_jogador, mapa_adversario); // Carrega os mapas
+            enviarParaCliente(jogador1, op, mensagem, mapa_jogador, mapa_adversario);
+            // Recebe do cliente a posição do navio que tentará ser inserido no mapa
+            receberDoCliente(jogador1, &op, &ancoraColuna, &ancoraLinha, &orientacao, nomeJogador1);
 
 
             if(criado == 0) // Verifica se o navio foi inicializado, se ja foi não ira o inicializar novamente
@@ -220,14 +229,14 @@ int jogo(int jogador1, int jogador2, struct admin_data* data)
         printf("Navio do tipo %d\n", i);
         while(qtdNaviosJ2[i] > 0)
         {
-                // Envia solicitação para o cliente posicionar o navio
-                op = 1; // Indica operação de posicionar navio
-                mensagem = i; // Exemplo de mensagem inicial
-                carregarMapa(mapaJogadorDois, mapaJogadorUm, mapa_jogador, mapa_adversario); // Carrega os mapas
-                enviarParaCliente(jogador2, op, mensagem, mapaVazio, mapaVazio);
-                
-                // Recebe do cliente a posição do navio que tentará ser inserido no mapa
-                receberDoCliente(jogador2, &op, &ancoraColuna, &ancoraLinha, &orientacao, nomeJogador2);
+            // Envia solicitação para o cliente posicionar o navio
+            op = 1; // Indica operação de posicionar navio
+            mensagem = i; // Exemplo de mensagem inicial
+            carregarMapa(mapaJogadorDois, mapaJogadorUm, mapa_jogador, mapa_adversario); // Carrega os mapas
+            enviarParaCliente(jogador2, op, mensagem, mapa_jogador, mapa_adversario);
+            
+            // Recebe do cliente a posição do navio que tentará ser inserido no mapa
+            receberDoCliente(jogador2, &op, &ancoraColuna, &ancoraLinha, &orientacao, nomeJogador2);
 
             if(criado == 0)
             {
@@ -267,7 +276,7 @@ int jogo(int jogador1, int jogador2, struct admin_data* data)
             // Envia solicitação para o cliente posicionar o navio
             op = 2; // Indica operação de realizar um disparo
             carregarMapa(mapaJogadorUm, mapaJogadorDois, mapa_jogador, mapa_adversario); // Carrega os mapas
-            enviarParaCliente(jogador1, op, mensagem, mapaVazio, mapaVazio);
+            enviarParaCliente(jogador1, op, mensagem, mapa_jogador, mapa_adversario);
             
             // Recebe do cliente a posição do navio que tentará ser inserido no mapa
             receberDoCliente(jogador1, &op, &alvoColuna, &alvoLinha, &orientacao, nomeJogador1);
@@ -311,7 +320,7 @@ int jogo(int jogador1, int jogador2, struct admin_data* data)
             // Jogador2 recebe uma solicitação para realizar um disparo e devolve a posição do disparo
             op = 2; // Indica operação de realizar um disparo
             carregarMapa(mapaJogadorDois, mapaJogadorUm, mapa_jogador, mapa_adversario); // Carrega os mapas
-            enviarParaCliente(jogador2, op, mensagem, mapaVazio, mapaVazio);
+            enviarParaCliente(jogador2, op, mensagem, mapa_jogador, mapa_adversario);
             
             // Recebe do cliente a posição do navio que tentará ser inserido no mapa
             receberDoCliente(jogador2, &op, &alvoColuna, &alvoLinha, &orientacao, nomeJogador1);

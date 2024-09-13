@@ -187,18 +187,18 @@ void pintaEstrutura(struct mapa* meuMapa, struct navio* navio)
 int realizarTiro(struct mapa* meuMapa, int coluna, int linha)
 {
     
-    if(atira(meuMapa, coluna, linha))
-    {
+    if(atira(meuMapa, coluna, linha))   
+    {   /// tiro acetou algum navio
         struct navio* navioAlvo = meuMapa->tabuleiro[coluna][linha].superficie;
     
         if(verificarEstrutura(navioAlvo) == 1)   
         {
             pintaEstrutura(meuMapa, navioAlvo);
-            navioAlvo->estado = 0;
+            navioAlvo->estado = 0;  // 0: Navio destruido
             return 2;       // 2: Tipo acertado e navio destruido
         }    
         return 1;           // 1: Tiro acertado mas navio permanece 
-    }else
+    }else   /// tiro acertou a agua
     {                           
         return 0;           // 0: Tiro na água
     }
